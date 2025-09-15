@@ -158,7 +158,7 @@ class AppThemes {
     primaryColor: deepOrange,
     primaryColorLight: orangeAccent,
     primaryColorDark: deepOrange,
-    scaffoldBackgroundColor: pureBlack,
+    scaffoldBackgroundColor: const Color.fromARGB(255, 22, 21, 21),
     appBarTheme: const AppBarTheme(
       backgroundColor: pureBlack,
       foregroundColor: warmIvory,
@@ -166,7 +166,7 @@ class AppThemes {
       surfaceTintColor: Colors.transparent,
     ),
     colorScheme: const ColorScheme.dark(
-      primary: deepOrange,
+      primary: crimsonRed,
       primaryContainer: Color(0xFF262626),
       secondary: orangeAccent,
       secondaryContainer: deepOrange,
@@ -175,7 +175,7 @@ class AppThemes {
       surface: deepDarkGray,
       surfaceContainerHighest: Color(0xFF2A2A2A),
       error: Color(0xFFEF5350),
-      onPrimary: pureBlack,
+      onPrimary: Color.fromARGB(255, 214, 209, 209),
       onPrimaryContainer: lightGray,
       onSecondary: pureBlack,
       onSecondaryContainer: lightGray,
