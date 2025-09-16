@@ -12,8 +12,8 @@ class MainApp extends StatelessWidget {
       designSize: const Size(360, 800),
       builder: (context, child) {
         return MaterialApp.router(
-          theme: ThemeData.light(useMaterial3: true),
-          darkTheme: ThemeData.dark(useMaterial3: true),
+          theme: ThemeData.light(useMaterial3: true).copyWith(),
+          darkTheme: ThemeData.dark(useMaterial3: true).copyWith(),
           themeMode: ThemeMode.system,
           routerConfig: router,
           debugShowCheckedModeBanner: false,
