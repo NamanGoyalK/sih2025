@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -486,7 +487,10 @@ class _ProfilePageState extends State<ProfilePage>
           Icons.logout_outlined,
           'Sign Out',
           'Sign out of your account',
-          onTap: () => _signOut(),
+          onTap: () {
+            context.go("/login");
+            _signOut();
+          },
           isDestructive: true,
         ),
       ],

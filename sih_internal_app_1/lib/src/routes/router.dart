@@ -19,5 +19,9 @@ final router = GoRouter(
       GoRoute(
         path: '/register',
         pageBuilder: (context, state) => const MaterialPage(child: RegisterPage()),
+      ),
+      GoRoute(
+        path: '/main',
+        pageBuilder: (context, state) => const MaterialPage(child: MainPage()),
       )
     ]);
