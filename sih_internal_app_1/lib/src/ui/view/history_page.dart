@@ -18,8 +18,8 @@ class HistoryPage extends StatelessWidget {
             decoration: BoxDecoration(
               color: colorScheme.primary,
               borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(24),
-                bottomRight: Radius.circular(24),
+                bottomLeft: Radius.circular(20),
+                bottomRight: Radius.circular(20),
               ),
             ),
             child: Column(
