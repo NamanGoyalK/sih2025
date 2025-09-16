@@ -554,15 +554,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     String title,
     IconData icon,
     Color color,
-    String subtitle, {
+    String subtitle, 
+    
+    {
     bool isPopular = false,
-  }) {
+    VoidCallback? onTap,
+  }
+  ) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    onTap ??= (){};
+    final VoidCallback safeOnTap = onTap ?? () {};
 
     return GestureDetector(
-      onTap: () {},
+      onTap: safeOnTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
