@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sih_internal_app_1/src/ui/onboarding/login/login_page.dart';
 import 'package:sih_internal_app_1/src/ui/onboarding/register/register_page.dart';
+import 'package:sih_internal_app_1/src/ui/results/result_page.dart';
 import 'package:sih_internal_app_1/src/ui/view/main_page.dart';
 
 final router = GoRouter(
@@ -23,5 +24,9 @@ final router = GoRouter(
       GoRoute(
         path: '/main',
         pageBuilder: (context, state) => const MaterialPage(child: MainPage()),
+      ),
+      GoRoute(
+        path: '/results',
+        pageBuilder: (context, state) => MaterialPage(child: ResultsPage()),
       )
     ]);

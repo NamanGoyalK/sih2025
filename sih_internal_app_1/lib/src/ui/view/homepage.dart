@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'notification_page.dart';
 import 'profile_page.dart';
+import 'package:go_router/go_router.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -196,6 +197,9 @@ class HomePage extends StatelessWidget {
                       Colors.blue,
                       'Height & Power',
                       'Most popular',
+                      () {
+                        context.go("/results");
+                      },
                     ),
                     _buildTestCard(
                       context,
@@ -427,14 +431,13 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildTestCard(BuildContext context, String title, IconData icon,
-      Color color, String subtitle, String? badge) {
+      Color color, String subtitle, String? badge, [VoidCallback? onTap]) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    onTap ??= (){};
 
     return InkWell(
-      onTap: () {
-        
-      },
+      onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
