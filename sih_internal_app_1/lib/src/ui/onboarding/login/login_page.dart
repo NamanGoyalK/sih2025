@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lottie/lottie.dart';
-import '../../../themes/themes.dart';
 import 'package:go_router/go_router.dart';
 
 class LoginPage extends StatelessWidget {
@@ -23,22 +22,21 @@ class LoginPage extends StatelessWidget {
                     height: 40.h,
                     width: 320.w,
                     alignment: AlignmentGeometry.center,
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 0),
-                      child: TextFormField(
-                        keyboardType: TextInputType.phone,
-                        style: AppThemes.darkTheme.textTheme.bodyMedium,
-                        decoration: InputDecoration(
-                          isDense: false,
-                          border: InputBorder.none,
-                          hintText: "Enter Mobile No. :",
-                          hintStyle: AppThemes.darkTheme.textTheme.bodySmall!.copyWith(fontWeight: FontWeight.w300),
-                        ),
-                      ),
-                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.white),
+                    ),
+                    child: Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16.w, vertical: 0),
+                      child: TextFormField(
+                        keyboardType: TextInputType.phone,
+                        decoration: const InputDecoration(
+                          isDense: false,
+                          border: InputBorder.none,
+                          hintText: "Enter Mobile No. :",
+                        ),
+                      ),
                     ),
                   ),
                   SizedBox(height: 30.h),
@@ -50,14 +48,13 @@ class LoginPage extends StatelessWidget {
                       height: 30.h,
                       width: 150.w,
                       alignment: AlignmentGeometry.center,
-                      child: Text(
-                        "Login",
-                        style: AppThemes.lightTheme.textTheme.displayMedium!.copyWith(fontSize: 16.sp),
-                      ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        color: AppThemes.warmIvory,
+                        color: Theme.of(context).colorScheme.primary,
                         border: Border.all(color: Colors.black),
+                      ),
+                      child: const Text(
+                        "Login",
                       ),
                     ),
                   ),
@@ -86,27 +83,28 @@ class LoginPage extends StatelessWidget {
               child: Container(
                 height: 175.h,
                 width: double.infinity,
-                child: SafeArea(
-                  child: Column(
-                  
-                    children: [
-                      
-                      // SizedBox(height: 30.h,),
-                      // SizedBox(height: 10.h,),
-          
-                      Lottie.asset('assets/Sign In.json', height: 120.h, ),
-                      // Text(
-                      //   "Login",
-                      //   style: AppThemes.lightTheme.primaryTextTheme.titleLarge!.copyWith(fontSize: 60.sp, fontWeight: FontWeight.bold, fontFamily: "cursive", color: Colors.grey),
-                      // ),
-                    ],
-                  ),
-                ),
                 decoration: BoxDecoration(
                   color: Colors.grey.withOpacity(0.25),
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(200),
                     bottomRight: Radius.circular(200),
+                  ),
+                ),
+                child: SafeArea(
+                  child: Column(
+                    children: [
+                      // SizedBox(height: 30.h,),
+                      // SizedBox(height: 10.h,),
+
+                      Lottie.asset(
+                        'assets/Sign In.json',
+                        height: 120.h,
+                      ),
+                      // Text(
+                      //   "Login",
+                      //   style: AppThemes.lightTheme.primaryTextTheme.titleLarge!.copyWith(fontSize: 60.sp, fontWeight: FontWeight.bold, fontFamily: "cursive", color: Colors.grey),
+                      // ),
+                    ],
                   ),
                 ),
               ),

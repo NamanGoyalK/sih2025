@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'src/routes/router.dart';
-import 'src/themes/themes.dart';
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
@@ -13,8 +12,8 @@ class MainApp extends StatelessWidget {
       designSize: const Size(360, 800),
       builder: (context, child) {
         return MaterialApp.router(
-          theme: AppThemes.lightTheme,
-          darkTheme: AppThemes.darkTheme,
+          theme: ThemeData.light(useMaterial3: true),
+          darkTheme: ThemeData.dark(useMaterial3: true),
           themeMode: ThemeMode.system,
           routerConfig: router,
           debugShowCheckedModeBanner: false,
