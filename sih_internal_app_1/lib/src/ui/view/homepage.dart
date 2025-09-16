@@ -97,9 +97,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // Add haptic feedback
-    HapticFeedback.lightImpact();
-
     // Enhanced notification icon with animation
     final notificationIcon = GestureDetector(
       onTap: () {
@@ -459,7 +456,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          'Record & analyze your performance',
+                                          'Quickly Record & analyze your performance for last category tested',
                                           style: theme.textTheme.bodyMedium
                                               ?.copyWith(),
                                         ),
@@ -500,28 +497,33 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Assessment Categories',
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  color: colorScheme.onSurface,
-                                  fontSize: 24,
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Assessment Categories',
+                                  style: theme.textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    color: colorScheme.onSurface,
+                                    fontSize: 24,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Choose your test type',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Choose your test type',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              HapticFeedback.mediumImpact();
+                              context.push('/assessment-categories');
+                            },
                             style: TextButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
