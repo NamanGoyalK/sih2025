@@ -103,9 +103,10 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                       colors: [
                         colorScheme.primary,
                         colorScheme.primary.withBlue(
-                          (colorScheme.primary.blue * 1.2)
+                          ((((colorScheme.primary.b * 255.0).round() * 1.2)
+                                  .round())
                               .clamp(0, 255)
-                              .toInt(),
+                              .toInt()),
                         ),
                       ],
                     ),
@@ -115,7 +116,8 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: colorScheme.primary.withOpacity(0.3),
+                        color:
+                            colorScheme.primary.withAlpha((0.3 * 255).toInt()),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -148,7 +150,8 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                             height: 120,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: colorScheme.onPrimary.withOpacity(0.1),
+                              color: colorScheme.onPrimary
+                                  .withAlpha((0.1 * 255).toInt()),
                             ),
                           ),
                         ),
@@ -160,7 +163,8 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                             height: 100,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: colorScheme.onPrimary.withOpacity(0.05),
+                              color: colorScheme.onPrimary
+                                  .withAlpha((0.05 * 255).toInt()),
                             ),
                           ),
                         ),
@@ -181,7 +185,8 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                                             padding: const EdgeInsets.all(12),
                                             decoration: BoxDecoration(
                                               color: colorScheme.onPrimary
-                                                  .withOpacity(0.2),
+                                                  .withAlpha(
+                                                      (0.2 * 255).toInt()),
                                               borderRadius:
                                                   BorderRadius.circular(16),
                                             ),
@@ -214,7 +219,8 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                                                       .textTheme.bodyMedium
                                                       ?.copyWith(
                                                     color: colorScheme.onPrimary
-                                                        .withOpacity(0.9),
+                                                        .withAlpha((0.9 * 255)
+                                                            .toInt()),
                                                   ),
                                                 ),
                                               ],
@@ -240,7 +246,7 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                                           ),
                                           decoration: BoxDecoration(
                                             color: colorScheme.onPrimary
-                                                .withOpacity(0.2),
+                                                .withAlpha((0.2 * 255).toInt()),
                                             borderRadius:
                                                 BorderRadius.circular(20),
                                           ),
@@ -338,15 +344,20 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                   builder: (context, child) {
                     return Transform.scale(
                       scale: _scaleAnimation.value,
-                      // *** CHANGED: Simplified podium container ***
                       child: Container(
                         margin: const EdgeInsets.symmetric(horizontal: 20),
                         decoration: BoxDecoration(
-                          color: colorScheme.surfaceContainerHighest,
+                          color: colorScheme.surfaceContainerHighest
+                              .withAlpha(100),
+                          border: Border.all(
+                            color: colorScheme.outline,
+                            width: 1,
+                          ),
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: [
                             BoxShadow(
-                              color: colorScheme.shadow.withOpacity(0.08),
+                              color: colorScheme.shadow
+                                  .withAlpha((0.08 * 255).toInt()),
                               blurRadius: 16,
                               offset: const Offset(0, 8),
                             ),
@@ -356,12 +367,10 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                           padding: const EdgeInsets.all(24),
                           child: Column(
                             children: [
-                              // *** CHANGED: Simplified "Top Performers" header ***
                               Row(
                                 children: [
                                   const Icon(
                                     Icons.emoji_events_rounded,
-                                    color: Color(0xFFFFD700),
                                     size: 28,
                                   ),
                                   const SizedBox(width: 12),
@@ -444,13 +453,14 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        colorScheme.secondary.withOpacity(0.1),
-                        colorScheme.secondary.withOpacity(0.05),
+                        colorScheme.secondary.withAlpha((0.1 * 255).toInt()),
+                        colorScheme.secondary.withAlpha((0.05 * 255).toInt()),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: colorScheme.secondary.withOpacity(0.3),
+                      color:
+                          colorScheme.secondary.withAlpha((0.3 * 255).toInt()),
                       width: 2,
                     ),
                   ),
@@ -467,14 +477,15 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                                 gradient: LinearGradient(
                                   colors: [
                                     colorScheme.secondary,
-                                    colorScheme.secondary.withOpacity(0.8),
+                                    colorScheme.secondary
+                                        .withAlpha((0.8 * 255).toInt()),
                                   ],
                                 ),
                                 borderRadius: BorderRadius.circular(16),
                                 boxShadow: [
                                   BoxShadow(
-                                    color:
-                                        colorScheme.secondary.withOpacity(0.3),
+                                    color: colorScheme.secondary
+                                        .withAlpha((0.3 * 255).toInt()),
                                     blurRadius: 8,
                                     offset: const Offset(0, 4),
                                   ),
@@ -529,7 +540,8 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                                       vertical: 2,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: Colors.green.withOpacity(0.2),
+                                      color: Colors.green
+                                          .withAlpha((0.2 * 255).toInt()),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
@@ -614,7 +626,8 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: colorScheme.primary.withOpacity(0.1),
+                              color: colorScheme.primary
+                                  .withAlpha((0.1 * 255).toInt()),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Row(
@@ -687,7 +700,7 @@ class _LeaderboardPageState extends State<LeaderboardPage>
             // Profile picture placeholder
             CircleAvatar(
               radius: isFirst ? 40 : 35, // 1st place is bigger
-              backgroundColor: color.withOpacity(0.2),
+              backgroundColor: color.withAlpha((0.2 * 255).toInt()),
               child: Text(
                 name.split(' ').map((e) => e[0]).join(), // Initials
                 style: theme.textTheme.titleLarge?.copyWith(
@@ -765,16 +778,16 @@ class _LeaderboardPageState extends State<LeaderboardPage>
           end: Alignment.bottomRight,
           colors: [
             theme.cardColor,
-            theme.cardColor.withOpacity(0.95),
+            theme.cardColor.withAlpha((0.95 * 255).toInt()),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: colorScheme.outline.withOpacity(0.15),
+          color: colorScheme.outline.withAlpha((0.25 * 255).toInt()),
         ),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.08),
+            color: colorScheme.shadow.withAlpha((0.08 * 255).toInt()),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -792,12 +805,12 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                 gradient: LinearGradient(
                   colors: [
                     colorScheme.primaryContainer,
-                    colorScheme.primaryContainer.withOpacity(0.8),
+                    colorScheme.primaryContainer.withAlpha((0.8 * 255).toInt()),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: colorScheme.primary.withOpacity(0.3),
+                  color: colorScheme.primary.withAlpha((0.3 * 255).toInt()),
                 ),
               ),
               child: Center(
@@ -818,8 +831,8 @@ class _LeaderboardPageState extends State<LeaderboardPage>
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    colorScheme.secondary.withOpacity(0.3),
-                    colorScheme.secondary.withOpacity(0.1),
+                    colorScheme.secondary.withAlpha((0.3 * 255).toInt()),
+                    colorScheme.secondary.withAlpha((0.1 * 255).toInt()),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(12),
@@ -890,7 +903,7 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: colorScheme.primary.withOpacity(0.1),
+                    color: colorScheme.primary.withAlpha((0.1 * 255).toInt()),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(

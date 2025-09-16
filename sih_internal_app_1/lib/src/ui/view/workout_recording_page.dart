@@ -159,10 +159,7 @@ class _WorkoutRecordingPageState extends State<WorkoutRecordingPage>
         _isRecording = true;
       });
 
-      // Get app documents directory
-      final Directory appDir = await getApplicationDocumentsDirectory();
-      final String videoPath =
-          '${appDir.path}/workout_${DateTime.now().millisecondsSinceEpoch}.mp4';
+      await getApplicationDocumentsDirectory();
 
       await _cameraController!.startVideoRecording();
 
@@ -413,7 +410,7 @@ class _WorkoutRecordingPageState extends State<WorkoutRecordingPage>
           margin: const EdgeInsets.all(16),
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white.withAlpha((0.1 * 255).toInt()),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.white24),
           ),

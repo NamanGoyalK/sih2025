@@ -16,23 +16,18 @@ class _ProfilePageState extends State<ProfilePage>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
-  // Athlete data
+  // User data - Updated for general user
   final String userName = "Naman Goyal";
-  final String userEmail = "naman.goyal@athlete.com";
-  final int userAge = 22;
-  final String userRole = "Professional Athlete";
-  final String userSport = "Football";
-  final String userTeam = "State Sports Academy";
-  final String joinDate = "September 2024";
-  final String height = "6'2\"";
-  final String weight = "75 kg";
-  final String position = "Midfielder";
-  final String bloodGroup = "B+";
-  final int trainingSessions = 45;
-  final int currentStreak = 7;
-  final double performanceRating = 8.5;
-  final int goalsScored = 12;
-  final int matchesPlayed = 28;
+  final String userEmail = "naman.goyal@gmail.com";
+  final int userAge = 19;
+  final String userRole = "Sports Aspirant";
+  final String userLocation = "Patiala, Punjab";
+  final String preferredSport = "Football";
+  final String joinDate = "October 2025";
+  final String height = "5'8\"";
+  final String weight = "88 kg";
+  final String fitnessLevel = "Intermediate";
+  final String bloodGroup = "O+";
 
   @override
   void initState() {
@@ -80,146 +75,295 @@ class _ProfilePageState extends State<ProfilePage>
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SlideTransition(
-          position: _slideAnimation,
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                // Profile Header Container
-                Container(
-                  width: double.infinity,
+      backgroundColor: colorScheme.surface,
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 180,
+            floating: false,
+            pinned: true,
+            stretch: true,
+            automaticallyImplyLeading: false,
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            flexibleSpace: LayoutBuilder(
+              builder: (context, constraints) {
+                final isCollapsed =
+                    constraints.maxHeight <= kToolbarHeight + 50;
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
                   decoration: BoxDecoration(
-                    color: colorScheme.primary,
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(20),
-                      bottomRight: Radius.circular(20),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        colorScheme.primary,
+                        colorScheme.primary.withBlue(
+                          ((((colorScheme.primary.b * 255.0).round() * 1.2)
+                                  .round())
+                              .clamp(0, 255)
+                              .toInt()),
+                        ),
+                      ],
                     ),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(isCollapsed ? 0 : 32),
+                      bottomRight: Radius.circular(isCollapsed ? 0 : 32),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                            colorScheme.primary.withAlpha((0.3 * 255).toInt()),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
                   ),
-                  child: SafeArea(
-                    bottom: false,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        children: [
-                          // Top row with back button and action icons
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.arrow_back),
-                                onPressed: () => Navigator.pop(context),
-                                color: colorScheme.onPrimary,
-                                tooltip: 'Back',
-                              ),
-                              Row(
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.edit_outlined),
-                                    onPressed: _showEditProfileDialog,
-                                    color: colorScheme.onPrimary,
-                                    tooltip: 'Edit Profile',
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.share_outlined),
-                                    onPressed: _shareProfile,
-                                    color: colorScheme.onPrimary,
-                                    tooltip: 'Share Profile',
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          // Profile Avatar
-                          Hero(
-                            tag: 'profile_avatar',
-                            child: Container(
-                              width: 120,
-                              height: 120,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: colorScheme.onPrimary,
-                                  width: 4,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black
-                                        .withAlpha((0.2 * 255).toInt()),
-                                    blurRadius: 20,
-                                    spreadRadius: 2,
-                                  ),
-                                ],
-                              ),
-                              child: CircleAvatar(
-                                radius: 56,
-                                backgroundColor: colorScheme.onPrimary,
-                                child: Text(
-                                  userName
-                                      .split(' ')
-                                      .map((e) => e[0])
-                                      .join()
-                                      .toUpperCase(),
-                                  style:
-                                      theme.textTheme.headlineMedium?.copyWith(
-                                    color: colorScheme.primary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          // User Name
-                          Text(
-                            userName,
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              color: colorScheme.onPrimary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          // User Role
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: colorScheme.onPrimary
-                                  .withAlpha((0.2 * 255).toInt()),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              userRole,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onPrimary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                        ],
+                  child: FlexibleSpaceBar(
+                    titlePadding: const EdgeInsets.only(
+                      left: 24,
+                      bottom: 16,
+                    ),
+                    centerTitle: false,
+                    title: AnimatedOpacity(
+                      opacity: isCollapsed ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 200),
+                      child: Text(
+                        'My Profile',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: colorScheme.onPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
+                    background: Stack(
+                      children: [
+                        // Decorative circles (match other pages)
+                        Positioned(
+                          top: -50,
+                          right: -50,
+                          child: Container(
+                            width: 200,
+                            height: 200,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: colorScheme.onPrimary
+                                  .withAlpha((0.1 * 255).toInt()),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: -30,
+                          left: -30,
+                          child: Container(
+                            width: 150,
+                            height: 150,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: colorScheme.onPrimary
+                                  .withAlpha((0.05 * 255).toInt()),
+                            ),
+                          ),
+                        ),
+                        SafeArea(
+                          bottom: false,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                            child: Row(
+                              children: [
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Hero(
+                                      tag: 'profile_avatar',
+                                      child: Stack(
+                                        children: [
+                                          Container(
+                                            width: 70,
+                                            height: 70,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: colorScheme.onPrimary,
+                                                width: 4,
+                                              ),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withAlpha(
+                                                      (0.2 * 255).toInt()),
+                                                  blurRadius: 20,
+                                                  spreadRadius: 2,
+                                                ),
+                                              ],
+                                            ),
+                                            child: CircleAvatar(
+                                              radius: 56,
+                                              backgroundColor:
+                                                  colorScheme.onPrimary,
+                                              child: Text(
+                                                userName
+                                                    .split(' ')
+                                                    .map((e) => e[0])
+                                                    .join()
+                                                    .toUpperCase(),
+                                                style: theme
+                                                    .textTheme.headlineMedium
+                                                    ?.copyWith(
+                                                  color: colorScheme.primary,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          // Achievement badge
+                                          Positioned(
+                                            bottom: 0,
+                                            right: 0,
+                                            child: Container(
+                                              width: 24,
+                                              height: 24,
+                                              decoration: BoxDecoration(
+                                                color: Colors.amber,
+                                                shape: BoxShape.circle,
+                                                border: Border.all(
+                                                  color: colorScheme.onPrimary,
+                                                  width: 2,
+                                                ),
+                                              ),
+                                              child: const Icon(
+                                                Icons.trending_up,
+                                                color: Colors.white,
+                                                size: 20,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(width: 16),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // User Name
+                                    Text(
+                                      userName,
+                                      style: theme.textTheme.headlineLarge
+                                          ?.copyWith(
+                                        color: colorScheme.onPrimary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: colorScheme.onPrimary
+                                            .withAlpha((0.2 * 255).toInt()),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        userRole,
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                          color: colorScheme.onPrimary,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+            actions: [
+              Container(
+                width: 40,
+                height: 40,
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      colorScheme.onPrimary.withAlpha((0.2 * 255).toInt()),
+                      colorScheme.onPrimary.withAlpha((0.1 * 255).toInt()),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: colorScheme.onPrimary.withAlpha((0.2 * 255).toInt()),
+                    width: 1,
                   ),
                 ),
-
-                // Profile Content
-                Padding(
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  iconSize: 20,
+                  icon: const Icon(Icons.edit_outlined, color: Colors.white),
+                  onPressed: _showEditProfileDialog,
+                  tooltip: 'Edit Profile',
+                ),
+              ),
+              Container(
+                width: 40,
+                height: 40,
+                margin: const EdgeInsets.only(right: 16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      colorScheme.onPrimary.withAlpha((0.2 * 255).toInt()),
+                      colorScheme.onPrimary.withAlpha((0.1 * 255).toInt()),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: colorScheme.onPrimary.withAlpha((0.2 * 255).toInt()),
+                    width: 1,
+                  ),
+                ),
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  iconSize: 20,
+                  icon: const Icon(Icons.share_outlined, color: Colors.white),
+                  onPressed: _shareProfile,
+                  tooltip: 'Share Progress',
+                ),
+              ),
+            ],
+          ),
+          SliverToBoxAdapter(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Stats Cards
-                      _buildStatsSection(theme, colorScheme),
+                      // Progress Overview Card
+                      _buildProgressOverviewCard(theme, colorScheme),
                       const SizedBox(height: 24),
 
                       // Personal Information
                       _buildPersonalInfoSection(theme, colorScheme),
                       const SizedBox(height: 24),
 
-                      // Settings Section
+                      // App Settings
                       _buildSettingsSection(theme, colorScheme),
                       const SizedBox(height: 24),
 
@@ -229,159 +373,124 @@ class _ProfilePageState extends State<ProfilePage>
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildStatsSection(ThemeData theme, ColorScheme colorScheme) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Athletic Performance',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 16),
-        // First row of stats
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                theme,
-                colorScheme,
-                Icons.sports_soccer_outlined,
-                goalsScored.toString(),
-                'Goals\nScored',
-                Colors.green,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                theme,
-                colorScheme,
-                Icons.sports_outlined,
-                matchesPlayed.toString(),
-                'Matches\nPlayed',
-                colorScheme.primary,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                theme,
-                colorScheme,
-                Icons.star_outline,
-                performanceRating.toString(),
-                'Performance\nRating',
-                Colors.amber,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        // Second row of stats
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                theme,
-                colorScheme,
-                Icons.fitness_center_outlined,
-                trainingSessions.toString(),
-                'Training\nSessions',
-                Colors.blue,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                theme,
-                colorScheme,
-                Icons.local_fire_department_outlined,
-                currentStreak.toString(),
-                'Training\nStreak',
-                Colors.orange,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                theme,
-                colorScheme,
-                Icons.auto_graph,
-                '34%',
-                'This Season Improvement',
-                Colors.purple,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatCard(
-    ThemeData theme,
-    ColorScheme colorScheme,
-    IconData icon,
-    String value,
-    String label,
-    Color accentColor,
-  ) {
+  Widget _buildProgressOverviewCard(ThemeData theme, ColorScheme colorScheme) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        // Match card style with other pages
+        color: colorScheme.surfaceContainerHighest.withAlpha(100),
         border: Border.all(
-          color: colorScheme.outline.withAlpha((0.2 * 255).toInt()),
+          color: colorScheme.outline,
+          width: 1,
         ),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withAlpha((0.1 * 255).toInt()),
-            blurRadius: 8,
-            spreadRadius: 0,
-            offset: const Offset(0, 2),
+            color: colorScheme.shadow.withAlpha((0.08 * 255).toInt()),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: accentColor.withAlpha((0.1 * 255).toInt()),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              icon,
-              color: accentColor,
-              size: 24,
-            ),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withAlpha((0.1 * 255).toInt()),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.emoji_events_rounded,
+                  color: colorScheme.primary,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Your Progress',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    Text(
+                      'Personal performance summary',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              height: 1.2,
-            ),
-            textAlign: TextAlign.center,
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Overall Score',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '72.5%',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        color: colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.green.withAlpha((0.15 * 255).toInt()),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.trending_up_rounded,
+                      size: 16,
+                      color: Colors.green,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Rank #15',
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: Colors.green,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -397,7 +506,7 @@ class _ProfilePageState extends State<ProfilePage>
         _buildInfoTile(
           colorScheme,
           Icons.person_outline,
-          'Name',
+          'Full Name',
           userName,
         ),
         _buildInfoTile(
@@ -413,6 +522,30 @@ class _ProfilePageState extends State<ProfilePage>
           'Age',
           '$userAge years',
         ),
+        _buildInfoTile(
+          colorScheme,
+          Icons.location_on_outlined,
+          'Location',
+          userLocation,
+        ),
+        _buildInfoTile(
+          colorScheme,
+          Icons.height_outlined,
+          'Height',
+          height,
+        ),
+        _buildInfoTile(
+          colorScheme,
+          Icons.monitor_weight_outlined,
+          'Weight',
+          weight,
+        ),
+        _buildInfoTile(
+          colorScheme,
+          Icons.water_drop_outlined,
+          'Blood Group',
+          bloodGroup,
+        ),
       ],
     );
   }
@@ -421,27 +554,27 @@ class _ProfilePageState extends State<ProfilePage>
     return _buildSection(
       theme,
       colorScheme,
-      'Settings',
+      'App Settings',
       [
         _buildActionTile(
           colorScheme,
           Icons.notifications_outlined,
           'Notifications',
-          'Manage your notification preferences',
+          'Manage assessment reminders',
           onTap: () => _navigateToNotifications(),
         ),
         _buildActionTile(
           colorScheme,
           Icons.security_outlined,
           'Privacy & Security',
-          'Manage your privacy settings',
+          'Manage your data privacy',
           onTap: () => _showPrivacySettings(),
         ),
         _buildActionTile(
           colorScheme,
           Icons.language_outlined,
           'Language',
-          'English',
+          'English (Change language)',
           onTap: () => _showLanguageSelector(),
         ),
         _buildActionTile(
@@ -459,14 +592,21 @@ class _ProfilePageState extends State<ProfilePage>
     return _buildSection(
       theme,
       colorScheme,
-      'Support',
+      'Help & Support',
       [
         _buildActionTile(
           colorScheme,
           Icons.help_outline,
           'Help Center',
-          'Get help and support',
+          'Get help with assessments',
           onTap: () => _openHelpCenter(),
+        ),
+        _buildActionTile(
+          colorScheme,
+          Icons.quiz_outlined,
+          'Assessment Guide',
+          'Learn about different tests',
+          onTap: () => _showAssessmentGuide(),
         ),
         _buildActionTile(
           colorScheme,
@@ -518,14 +658,14 @@ class _ProfilePageState extends State<ProfilePage>
             color: colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: colorScheme.outline.withAlpha((0.2 * 255).toInt()),
+              color: colorScheme.outline,
             ),
             boxShadow: [
               BoxShadow(
-                color: colorScheme.shadow.withAlpha((0.1 * 255).toInt()),
-                blurRadius: 8,
+                color: colorScheme.shadow.withAlpha((0.08 * 255).toInt()),
+                blurRadius: 12,
                 spreadRadius: 0,
-                offset: const Offset(0, 2),
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -626,18 +766,16 @@ class _ProfilePageState extends State<ProfilePage>
     );
   }
 
-  // Action methods
+  // Action methods - Updated for general user context
   void _showEditProfileDialog() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-          content: Text('Edit athlete profile feature coming soon!')),
+      const SnackBar(content: Text('Edit profile feature coming soon!')),
     );
   }
 
   void _shareProfile() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-          content: Text('Share athlete profile feature coming soon!')),
+      const SnackBar(content: Text('Share progress feature coming soon!')),
     );
   }
 
@@ -676,6 +814,12 @@ class _ProfilePageState extends State<ProfilePage>
     );
   }
 
+  void _showAssessmentGuide() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Assessment guide coming soon!')),
+    );
+  }
+
   void _sendFeedback() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Feedback feature coming soon!')),
@@ -685,12 +829,12 @@ class _ProfilePageState extends State<ProfilePage>
   void _showAboutDialog() {
     showAboutDialog(
       context: context,
-      applicationName: 'SIH Athlete Management',
+      applicationName: 'Sports Talent Assessment',
       applicationVersion: '1.0.0',
-      applicationLegalese: '© 2024 SIH Team',
+      applicationLegalese: '© 2025 Sports Authority of India',
       children: [
         const Text(
-            'Athletic Performance Management App built with Flutter for Smart India Hackathon 2025'),
+            'AI-Powered Mobile Platform for Democratizing Sports Talent Assessment - Smart India Hackathon 2025'),
       ],
     );
   }

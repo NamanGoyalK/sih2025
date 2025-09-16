@@ -13,6 +13,7 @@ class _NotificationPageState extends State<NotificationPage>
   late Animation<double> _fadeAnimation;
 
   List<NotificationItem> allNotifications = [];
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -36,6 +37,10 @@ class _NotificationPageState extends State<NotificationPage>
     ));
 
     _fadeController.forward();
+
+    _scrollController.addListener(() {
+      setState(() {});
+    });
   }
 
   void _initializeData() {
@@ -102,6 +107,7 @@ class _NotificationPageState extends State<NotificationPage>
   @override
   void dispose() {
     _fadeController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -111,101 +117,263 @@ class _NotificationPageState extends State<NotificationPage>
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: Column(
-          children: [
-            // Header Section with rounded container
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
-              decoration: BoxDecoration(
-                color: colorScheme.primary,
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(24),
-                  bottomRight: Radius.circular(24),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Row(
-                          children: [
-                            InkWell(
-                              onTap: () => Navigator.pop(context),
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: colorScheme.onPrimary
-                                      .withAlpha((0.2 * 255).toInt()),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Icon(
-                                  Icons.arrow_back,
-                                  color: colorScheme.onPrimary,
-                                  size: 20,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Text(
-                              'Notifications',
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                color: colorScheme.onPrimary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+      backgroundColor: colorScheme.surface,
+      body: CustomScrollView(
+        controller: _scrollController,
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          // Enhanced Animated Header matching other pages
+          SliverAppBar(
+            expandedHeight: 150,
+            floating: false,
+            pinned: true,
+            stretch: true,
+            automaticallyImplyLeading: false,
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            flexibleSpace: LayoutBuilder(
+              builder: (context, constraints) {
+                final isCollapsed =
+                    constraints.maxHeight <= kToolbarHeight + 50;
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        colorScheme.primary,
+                        colorScheme.primary.withBlue(
+                          ((((colorScheme.primary.b * 255.0).round() * 1.2)
+                                  .round())
+                              .clamp(0, 255)
+                              .toInt()),
                         ),
-                      ),
-                      InkWell(
-                        onTap: _markAllAsRead,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colorScheme.onPrimary
-                                .withAlpha((0.2 * 255).toInt()),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.done_all,
-                                color: colorScheme.onPrimary,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Mark All Read',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.onPrimary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(isCollapsed ? 0 : 32),
+                      bottomRight: Radius.circular(isCollapsed ? 0 : 32),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                            colorScheme.primary.withAlpha((0.3 * 255).toInt()),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
                       ),
                     ],
                   ),
-                ],
+                  child: FlexibleSpaceBar(
+                    titlePadding: EdgeInsets.only(
+                      left: 24,
+                      bottom: isCollapsed ? 16 : 80,
+                    ),
+                    title: AnimatedOpacity(
+                      opacity: isCollapsed ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 200),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    colorScheme.onPrimary
+                                        .withAlpha((0.2 * 255).toInt()),
+                                    colorScheme.onPrimary
+                                        .withAlpha((0.1 * 255).toInt()),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: colorScheme.onPrimary
+                                      .withAlpha((0.2 * 255).toInt()),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.arrow_back,
+                                color: colorScheme.onPrimary,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Notifications',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              color: colorScheme.onPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    background: Stack(
+                      children: [
+                        // Decorative circles
+                        Positioned(
+                          top: -50,
+                          right: -50,
+                          child: Container(
+                            width: 200,
+                            height: 200,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: colorScheme.onPrimary
+                                  .withAlpha((0.1 * 255).toInt()),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: -30,
+                          left: -30,
+                          child: Container(
+                            width: 150,
+                            height: 150,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: colorScheme.onPrimary
+                                  .withAlpha((0.05 * 255).toInt()),
+                            ),
+                          ),
+                        ),
+                        SafeArea(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () => Navigator.pop(context),
+                                          child: Container(
+                                            padding: const EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                colors: [
+                                                  colorScheme.onPrimary
+                                                      .withAlpha(
+                                                          (0.2 * 255).toInt()),
+                                                  colorScheme.onPrimary
+                                                      .withAlpha(
+                                                          (0.1 * 255).toInt()),
+                                                ],
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              border: Border.all(
+                                                color: colorScheme.onPrimary
+                                                    .withAlpha(
+                                                        (0.2 * 255).toInt()),
+                                                width: 1,
+                                              ),
+                                            ),
+                                            child: Icon(
+                                              Icons.arrow_back,
+                                              color: colorScheme.onPrimary,
+                                              size: 20,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        FadeTransition(
+                                          opacity: _fadeAnimation,
+                                          child: Text(
+                                            'Notifications',
+                                            style: theme
+                                                .textTheme.headlineMedium
+                                                ?.copyWith(
+                                              fontSize: 32,
+                                              color: colorScheme.onPrimary,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    IconButton(
+                                      onPressed: _markAllAsRead,
+                                      icon: Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              colorScheme.onPrimary.withAlpha(
+                                                  (0.2 * 255).toInt()),
+                                              colorScheme.onPrimary.withAlpha(
+                                                  (0.1 * 255).toInt()),
+                                            ],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                          border: Border.all(
+                                            color: colorScheme.onPrimary
+                                                .withAlpha((0.2 * 255).toInt()),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.done_all,
+                                          color: colorScheme.onPrimary,
+                                          size: 22,
+                                        ),
+                                      ),
+                                      tooltip: 'Mark all as read',
+                                    ),
+                                  ],
+                                ),
+                                const Spacer(),
+                                FadeTransition(
+                                  opacity: _fadeAnimation,
+                                  child: Text(
+                                    'Stay updated with your progress',
+                                    style: theme.textTheme.bodyLarge?.copyWith(
+                                      color: colorScheme.onPrimary
+                                          .withAlpha((0.8 * 255).toInt()),
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          // Main Content
+          SliverToBoxAdapter(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: _buildNotificationList(
+                allNotifications,
+                'No notifications yet',
               ),
             ),
-            // Content
-            Expanded(
-              child: _buildNotificationList(
-                  allNotifications, 'No notifications yet'),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -213,15 +381,20 @@ class _NotificationPageState extends State<NotificationPage>
   Widget _buildNotificationList(
       List<NotificationItem> notifications, String emptyMessage) {
     if (notifications.isEmpty) {
-      return _buildEmptyState(emptyMessage);
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: _buildEmptyState(emptyMessage),
+      );
     }
 
-    return ListView.builder(
+    return Padding(
       padding: const EdgeInsets.all(16),
-      itemCount: notifications.length,
-      itemBuilder: (context, index) {
-        return _buildNotificationCard(notifications[index], index);
-      },
+      child: Column(
+        children: List.generate(
+          notifications.length,
+          (index) => _buildNotificationCard(notifications[index], index),
+        ),
+      ),
     );
   }
 

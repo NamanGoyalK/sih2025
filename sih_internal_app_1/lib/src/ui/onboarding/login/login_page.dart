@@ -84,7 +84,7 @@ class LoginPage extends StatelessWidget {
                 height: 175.h,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.25),
+                  color: Colors.grey.withAlpha((0.25 * 255).toInt()),
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(200),
                     bottomRight: Radius.circular(200),
