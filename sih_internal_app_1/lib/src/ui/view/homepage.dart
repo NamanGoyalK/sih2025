@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'notification_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -302,6 +303,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               colorScheme.tertiary,
                               'Power Test',
                               isPopular: true,
+                              onTap: () {
+                                context.go("/results");
+                              },
                             ),
                             _buildSportsCard(
                               context,

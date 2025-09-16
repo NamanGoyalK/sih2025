@@ -9,6 +9,7 @@ class ResultsPage extends StatefulWidget {
 }
 
 class _ResultsPageState extends State<ResultsPage> {
+  int selectedTab = 0; // 0: Results, 1: Graph
   final summary = {
     "total_jumps": 2,
     "best_jump_height": 0.152,
@@ -64,22 +65,34 @@ class _ResultsPageState extends State<ResultsPage> {
               padding: EdgeInsets.only(top: 16.h, left: 16.w, right: 16.w),
               child: Container(
                 height: 30.h,
-                width: 80.w,
+                width: 180.w,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     GestureDetector(
-                      
-                      child: Text("Results"),
-                      onTap: () {},
+                      child: Text(
+                        "Results",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: selectedTab == 0 ? Colors.blue : Colors.black,
+                        ),
+                      ),
+                      onTap: () {
+                        setState(() => selectedTab = 0);
+                      },
                     ),
-                    VerticalDivider(
-                      color: Colors.black,
-                    ),
+                    VerticalDivider(color: Colors.black),
                     GestureDetector(
-                      
-                      child: Text("Graph"),
-                      onTap: () {},
+                      child: Text(
+                        "Graph",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: selectedTab == 1 ? Colors.blue : Colors.black,
+                        ),
+                      ),
+                      onTap: () {
+                        setState(() => selectedTab = 1);
+                      },
                     ),
                   ],
                 ),
@@ -90,102 +103,102 @@ class _ResultsPageState extends State<ResultsPage> {
               ),
             ),
           ),
-          // Summary cards
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.only(top: 16.h, left: 16.w, right: 16.w),
-              child: Wrap(
-                spacing: 10.sp,
-                runSpacing: 10.sp,
-                children: summary.entries.map((e) {
-                  return Container(
-                    height: 140.h,
-                    width: double.maxFinite,
-                    padding: EdgeInsets.all(16.sp),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 6,
-                            offset: Offset(0, 3))
-                      ],
+          // Show Results or Graph based on selectedTab
+          selectedTab == 0
+              ? SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 16.h, left: 16.w, right: 16.w),
+                    child: Wrap(
+                      spacing: 10.sp,
+                      runSpacing: 10.sp,
+                      children: summary.entries.map((e) {
+                        return Container(
+                          height: 140.h,
+                          width: double.maxFinite,
+                          padding: EdgeInsets.all(16.sp),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 6,
+                                  offset: Offset(0, 3))
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(e.key,
+                                  style: TextStyle(
+                                      fontSize: 18.sp, fontWeight: FontWeight.bold)),
+                              SizedBox(height: 4),
+                              Text(e.value.toString(),
+                                  style: TextStyle(color: Colors.grey[600])),
+                            ],
+                          ),
+                        );
+                      }).toList(),
                     ),
+                  ),
+                )
+              : SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.sp),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(e.key,
+                        Text('Compare Jumps by:',
                             style: TextStyle(
-                                fontSize: 18.sp, fontWeight: FontWeight.bold)),
-                        SizedBox(height: 4),
-                        Text(e.value.toString(),
-                            style: TextStyle(color: Colors.grey[600])),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-          // 📈 Chart section
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.all(16.sp),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Compare Jumps by:',
-                      style: TextStyle(
-                          fontSize: 16.sp, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 8.h),
-                  DropdownButton<String>(
-                    value: selectedMetric,
-                    items: [
-                      "Jump Height (relative)",
-                      "Jump Distance (relative)",
-                      "Knee Angle at crouch",
-                      "Flight Time (s)"
-                    ]
-                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                        .toList(),
-                    onChanged: (val) {
-                      setState(() => selectedMetric = val!);
-                    },
-                  ),
-                  SizedBox(height: 16.h),
-                  Container(
-                    height: 250.h,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 6,
-                            offset: Offset(0, 3))
-                      ],
-                    ),
-                    padding: EdgeInsets.all(12.sp),
-                    child: SfCartesianChart(
-                      primaryXAxis: CategoryAxis(),
-                      title: ChartTitle(text: '$selectedMetric across jumps'),
-                      series: <LineSeries<Map<String, dynamic>, String>>[
-                        LineSeries<Map<String, dynamic>, String>(
-                          dataSource: jumps,
-                          xValueMapper: (data, index) => 'Jump ${index + 1}',
-                          yValueMapper: (data, _) =>
-                              data[selectedMetric] as num,
-                          markerSettings: MarkerSettings(isVisible: true),
-                          dataLabelSettings: DataLabelSettings(isVisible: true),
+                                fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 8.h),
+                        DropdownButton<String>(
+                          value: selectedMetric,
+                          items: [
+                            "Jump Height (relative)",
+                            "Jump Distance (relative)",
+                            "Knee Angle at crouch",
+                            "Flight Time (s)"
+                          ]
+                              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                              .toList(),
+                          onChanged: (val) {
+                            setState(() => selectedMetric = val!);
+                          },
+                        ),
+                        SizedBox(height: 16.h),
+                        Container(
+                          height: 250.h,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 6,
+                                  offset: Offset(0, 3))
+                            ],
+                          ),
+                          padding: EdgeInsets.all(12.sp),
+                          child: SfCartesianChart(
+                            primaryXAxis: CategoryAxis(),
+                            title: ChartTitle(text: '$selectedMetric across jumps'),
+                            series: <LineSeries<Map<String, dynamic>, String>>[
+                              LineSeries<Map<String, dynamic>, String>(
+                                dataSource: jumps,
+                                xValueMapper: (data, index) => 'Jump ${index + 1}',
+                                yValueMapper: (data, _) =>
+                                    data[selectedMetric] as num,
+                                markerSettings: MarkerSettings(isVisible: true),
+                                dataLabelSettings: DataLabelSettings(isVisible: true),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
+                ),
           // Optional footer
           SliverToBoxAdapter(
             child: Padding(
