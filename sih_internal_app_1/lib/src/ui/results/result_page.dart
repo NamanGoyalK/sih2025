@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:video_player/video_player.dart';
+import 'package:go_router/go_router.dart';
 
 class ResultsPage extends StatefulWidget {
+  const ResultsPage({super.key});
+
   @override
   State<ResultsPage> createState() => _ResultsPageState();
 }
 
 class _ResultsPageState extends State<ResultsPage> {
-  int selectedTab = 0; // 0: Results, 1: Graph
+  int selectedTab = 0; // 0: Results, 1: Graph, 2: Video
+  late VideoPlayerController _videoController;
+  bool _videoInitialized = false;
+
   final summary = {
     "total_jumps": 2,
     "best_jump_height": 0.152,
@@ -39,12 +45,29 @@ class _ResultsPageState extends State<ResultsPage> {
   String selectedMetric = "Jump Height (relative)";
 
   @override
+  void initState() {
+    super.initState();
+    _videoController = VideoPlayerController.asset('assets/dummyvid1sih.mp4')
+      ..initialize().then((_) {
+        setState(() {
+          _videoInitialized = true;
+        });
+      });
+  }
+
+  @override
+  void dispose() {
+    _videoController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         shadowColor: Colors.grey,
-        title: Text(
+        title: const Text(
           'Jump Test Results',
           style: TextStyle(
             fontWeight: FontWeight.w600,
@@ -56,161 +79,210 @@ class _ResultsPageState extends State<ResultsPage> {
           icon: Icon(Icons.arrow_back_ios_new, size: 16.sp),
         ),
       ),
-      body: CustomScrollView(
-        physics: BouncingScrollPhysics(),
-        slivers: [
-          // Header container
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.only(top: 16.h, left: 16.w, right: 16.w),
-              child: Container(
-                height: 30.h,
-                width: 180.w,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    GestureDetector(
-                      child: Text(
-                        "Results",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: selectedTab == 0 ? Colors.blue : Colors.black,
-                        ),
-                      ),
-                      onTap: () {
-                        setState(() => selectedTab = 0);
-                      },
-                    ),
-                    VerticalDivider(color: Colors.black),
-                    GestureDetector(
-                      child: Text(
-                        "Graph",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: selectedTab == 1 ? Colors.blue : Colors.black,
-                        ),
-                      ),
-                      onTap: () {
-                        setState(() => selectedTab = 1);
-                      },
-                    ),
-                  ],
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: Colors.black),
+      body: SafeArea(
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            // ===== Top Tabs =====
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.all(16.w),
+                child: Container(
+                  height: 40.h,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: Colors.black),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildTabButton("Results", 0),
+                      const VerticalDivider(color: Colors.black),
+                      _buildTabButton("Graph", 1),
+                      const VerticalDivider(color: Colors.black),
+                      _buildTabButton("Video", 2),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          // Show Results or Graph based on selectedTab
-          selectedTab == 0
-              ? SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 16.h, left: 16.w, right: 16.w),
-                    child: Wrap(
-                      spacing: 10.sp,
-                      runSpacing: 10.sp,
-                      children: summary.entries.map((e) {
-                        return Container(
-                          height: 140.h,
-                          width: double.maxFinite,
-                          padding: EdgeInsets.all(16.sp),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 6,
-                                  offset: Offset(0, 3))
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(e.key,
-                                  style: TextStyle(
-                                      fontSize: 18.sp, fontWeight: FontWeight.bold)),
-                              SizedBox(height: 4),
-                              Text(e.value.toString(),
-                                  style: TextStyle(color: Colors.grey[600])),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
+        
+            // ===== Tab Content =====
+            if (selectedTab == 0) _buildResultsView(),
+            if (selectedTab == 1) _buildGraphView(),
+            if (selectedTab == 2) _buildVideoView(),
+        
+            // ===== Footer =====
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.all(16.w),
+                child: ElevatedButton(
+                  onPressed: () {},
+                  child: const Text('Download Results'),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabButton(String title, int index) {
+    return GestureDetector(
+      onTap: () => setState(() => selectedTab = index),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: selectedTab == index ? Colors.blue : Colors.black,
+        ),
+      ),
+    );
+  }
+
+  // ===== RESULTS TAB =====
+  Widget _buildResultsView() {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        child: Wrap(
+          spacing: 10.sp,
+          runSpacing: 10.sp,
+          children: summary.entries.map((e) {
+            return Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(16.sp),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: const [
+                  BoxShadow(
+                      color: Colors.black12, blurRadius: 6, offset: Offset(0, 3))
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(e.key,
+                      style: TextStyle(
+                          fontSize: 18.sp, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text(e.value.toString(),
+                      style: TextStyle(color: Colors.grey[600])),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  // ===== GRAPH TAB =====
+  Widget _buildGraphView() {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.all(16.sp),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Compare Jumps by:',
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+            SizedBox(height: 8.h),
+            DropdownButton<String>(
+              value: selectedMetric,
+              items: [
+                "Jump Height (relative)",
+                "Jump Distance (relative)",
+                "Knee Angle at crouch",
+                "Flight Time (s)"
+              ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+              onChanged: (val) {
+                setState(() => selectedMetric = val!);
+              },
+            ),
+            SizedBox(height: 16.h),
+            Container(
+              height: 250.h,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: const [
+                  BoxShadow(
+                      color: Colors.black12, blurRadius: 6, offset: Offset(0, 3))
+                ],
+              ),
+              padding: EdgeInsets.all(12.sp),
+              child: SfCartesianChart(
+                primaryXAxis: const CategoryAxis(),
+                title: ChartTitle(text: '$selectedMetric across jumps'),
+                series: <LineSeries<Map<String, dynamic>, String>>[
+                  LineSeries<Map<String, dynamic>, String>(
+                    dataSource: jumps,
+                    xValueMapper: (data, index) => 'Jump ${index + 1}',
+                    yValueMapper: (data, _) => data[selectedMetric] as num,
+                    markerSettings: const MarkerSettings(isVisible: true),
+                    dataLabelSettings: const DataLabelSettings(isVisible: true),
                   ),
-                )
-              : SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.sp),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Compare Jumps by:',
-                            style: TextStyle(
-                                fontSize: 16.sp, fontWeight: FontWeight.bold)),
-                        SizedBox(height: 8.h),
-                        DropdownButton<String>(
-                          value: selectedMetric,
-                          items: [
-                            "Jump Height (relative)",
-                            "Jump Distance (relative)",
-                            "Knee Angle at crouch",
-                            "Flight Time (s)"
-                          ]
-                              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                              .toList(),
-                          onChanged: (val) {
-                            setState(() => selectedMetric = val!);
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ===== VIDEO TAB =====
+  Widget _buildVideoView() {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.all(16.sp),
+        child: Container(
+          height: 250.h,
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: const [
+              BoxShadow(
+                  color: Colors.black12, blurRadius: 6, offset: Offset(0, 3))
+            ],
+          ),
+          child: _videoInitialized
+              ? AspectRatio(
+                  aspectRatio: _videoController.value.aspectRatio,
+                  child: Stack(
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      VideoPlayer(_videoController),
+                      VideoProgressIndicator(_videoController,
+                          allowScrubbing: true),
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: IconButton(
+                          icon: Icon(
+                            _videoController.value.isPlaying
+                                ? Icons.pause
+                                : Icons.play_arrow,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              if (_videoController.value.isPlaying) {
+                                _videoController.pause();
+                              } else {
+                                _videoController.play();
+                              }
+                            });
                           },
                         ),
-                        SizedBox(height: 16.h),
-                        Container(
-                          height: 250.h,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 6,
-                                  offset: Offset(0, 3))
-                            ],
-                          ),
-                          padding: EdgeInsets.all(12.sp),
-                          child: SfCartesianChart(
-                            primaryXAxis: CategoryAxis(),
-                            title: ChartTitle(text: '$selectedMetric across jumps'),
-                            series: <LineSeries<Map<String, dynamic>, String>>[
-                              LineSeries<Map<String, dynamic>, String>(
-                                dataSource: jumps,
-                                xValueMapper: (data, index) => 'Jump ${index + 1}',
-                                yValueMapper: (data, _) =>
-                                    data[selectedMetric] as num,
-                                markerSettings: MarkerSettings(isVisible: true),
-                                dataLabelSettings: DataLabelSettings(isVisible: true),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ),
-          // Optional footer
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.only(
-                  top: 0, bottom: 16.h, left: 16.w, right: 16.w),
-              child: ElevatedButton(
-                onPressed: () {},
-                child: Text('Download Results'),
-              ),
-            ),
-          ),
-        ],
+                )
+              : const Center(child: CircularProgressIndicator()),
+        ),
       ),
     );
   }

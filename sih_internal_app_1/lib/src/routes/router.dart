@@ -27,6 +27,6 @@ final router = GoRouter(
       ),
       GoRoute(
         path: '/results',
-        pageBuilder: (context, state) => MaterialPage(child: ResultsPage()),
+        pageBuilder: (context, state) => const MaterialPage(child: ResultsPage()),
       )
     ]);
