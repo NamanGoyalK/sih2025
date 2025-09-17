@@ -1,8 +1,8 @@
 // filepath: lib/src/models/assessment_category.dart
 class AssessmentCategory {
   final String title;
-  final String iconKey; // e.g. 'arrow_upward', 'directions_run'
-  final String colorHex; // e.g. '#FF6B6B'
+  final String iconKey;
+  final String colorHex;
   final String subtitle;
   final String duration;
   final String description;

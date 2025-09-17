@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import '../widgets/settings_bottom_sheets.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -28,6 +29,15 @@ class _ProfilePageState extends State<ProfilePage>
   final String weight = "88 kg";
   final String fitnessLevel = "Intermediate";
   final String bloodGroup = "O+";
+
+  // Settings state (persist locally for now; integrate with storage later)
+  bool _inAppNotifications = true;
+  bool _emailNotifications = true;
+  bool _twoFactorAuth = false;
+  bool _allowAnalytics = true;
+  bool _shareActivityPublicly = false;
+  ThemeMode _selectedThemeMode = ThemeMode.system;
+  String _languageCode = 'en'; // default English
 
   @override
   void initState() {
@@ -561,28 +571,61 @@ class _ProfilePageState extends State<ProfilePage>
           Icons.notifications_outlined,
           'Notifications',
           'Manage assessment reminders',
-          onTap: () => _navigateToNotifications(),
+          onTap: () {
+            SettingsBottomSheets.showNotifications(
+              context,
+              inAppEnabled: _inAppNotifications,
+              emailEnabled: _emailNotifications,
+              onInAppChanged: (v) => setState(() => _inAppNotifications = v),
+              onEmailChanged: (v) => setState(() => _emailNotifications = v),
+            );
+          },
         ),
         _buildActionTile(
           colorScheme,
           Icons.security_outlined,
           'Privacy & Security',
           'Manage your data privacy',
-          onTap: () => _showPrivacySettings(),
+          onTap: () {
+            SettingsBottomSheets.showPrivacySecurity(
+              context,
+              twoFactor: _twoFactorAuth,
+              allowAnalytics: _allowAnalytics,
+              sharePublic: _shareActivityPublicly,
+              onTwoFactorChanged: (v) => setState(() => _twoFactorAuth = v),
+              onAllowAnalyticsChanged: (v) =>
+                  setState(() => _allowAnalytics = v),
+              onSharePublicChanged: (v) =>
+                  setState(() => _shareActivityPublicly = v),
+              onDeleteAccount: _confirmDeleteAccount,
+            );
+          },
         ),
         _buildActionTile(
           colorScheme,
           Icons.language_outlined,
           'Language',
-          'English (Change language)',
-          onTap: () => _showLanguageSelector(),
+          '${_languageDisplayName(_languageCode)} (Change language)',
+          onTap: () {
+            SettingsBottomSheets.showLanguage(
+              context,
+              languageCode: _languageCode,
+              onChanged: (code) => setState(() => _languageCode = code),
+            );
+          },
         ),
         _buildActionTile(
           colorScheme,
           Icons.dark_mode_outlined,
           'Theme',
-          'System default',
-          onTap: () => _showThemeSelector(),
+          _themeLabel(_selectedThemeMode),
+          onTap: () {
+            SettingsBottomSheets.showTheme(
+              context,
+              selected: _selectedThemeMode,
+              onChanged: (mode) => setState(() => _selectedThemeMode = mode),
+            );
+          },
         ),
       ],
     );
@@ -766,6 +809,8 @@ class _ProfilePageState extends State<ProfilePage>
     );
   }
 
+  // Remove old inline sheet implementations and helper
+
   // Action methods - Updated for general user context
   void _showEditProfileDialog() {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -783,28 +828,6 @@ class _ProfilePageState extends State<ProfilePage>
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Copied $text to clipboard')),
-    );
-  }
-
-  void _navigateToNotifications() {
-    Navigator.pushNamed(context, '/notifications');
-  }
-
-  void _showPrivacySettings() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Privacy settings coming soon!')),
-    );
-  }
-
-  void _showLanguageSelector() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Language selector coming soon!')),
-    );
-  }
-
-  void _showThemeSelector() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Theme selector coming soon!')),
     );
   }
 
@@ -839,6 +862,36 @@ class _ProfilePageState extends State<ProfilePage>
     );
   }
 
+  void _confirmDeleteAccount() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete account?'),
+        content: const Text(
+            'This will permanently remove your account and all data. This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () {
+              Navigator.pop(ctx); // close dialog
+              Navigator.pop(context); // close sheet
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Account deleted and data removed')),
+              );
+              context.go('/login');
+            },
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _signOut() {
     showDialog(
       context: context,
@@ -862,5 +915,48 @@ class _ProfilePageState extends State<ProfilePage>
         ],
       ),
     );
+  }
+
+  String _themeLabel(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return 'Light';
+      case ThemeMode.dark:
+        return 'Dark';
+      case ThemeMode.system:
+        return 'System default';
+    }
+  }
+
+  String _languageDisplayName(String code) {
+    switch (code) {
+      case 'hi':
+        return 'Hindi';
+      case 'bn':
+        return 'Bengali';
+      case 'te':
+        return 'Telugu';
+      case 'mr':
+        return 'Marathi';
+      case 'ta':
+        return 'Tamil';
+      case 'gu':
+        return 'Gujarati';
+      case 'kn':
+        return 'Kannada';
+      case 'ml':
+        return 'Malayalam';
+      case 'or':
+        return 'Odia';
+      case 'pa':
+        return 'Punjabi';
+      case 'as':
+        return 'Assamese';
+      case 'ur':
+        return 'Urdu';
+      case 'en':
+      default:
+        return 'English';
+    }
   }
 }

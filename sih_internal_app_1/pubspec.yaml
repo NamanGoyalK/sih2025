@@ -20,6 +20,12 @@ dependencies:
   camera: ^0.10.5+9
   path_provider: ^2.1.1
   permission_handler: ^11.0.1
+  # Added for localization support
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
+  # Persist selected language
+  shared_preferences: ^2.3.2
 
 dev_dependencies:
   flutter_test:
@@ -28,6 +34,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  # Enable generation of localization delegates from ARB files in lib/l10n
+  generate: true
   assets:
     - assets/Sign In.json
     - assets/dummyvid1sih.mp4

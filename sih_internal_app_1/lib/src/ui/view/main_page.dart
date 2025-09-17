@@ -100,6 +100,10 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                 decoration: BoxDecoration(
                   color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: colorScheme.onSurface.withAlpha(51),
+                    width: 1,
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: colorScheme.shadow.withAlpha(26),
@@ -154,7 +158,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         borderRadius: BorderRadius.circular(20),
         border: isSelected
             ? Border.all(
-                color: colorScheme.primary.withAlpha(51),
+                color: colorScheme.primary.withAlpha(81),
                 width: 1,
               )
             : null,
