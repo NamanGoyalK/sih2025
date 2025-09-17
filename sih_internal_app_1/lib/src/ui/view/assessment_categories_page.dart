@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:sih_internal_app_1/src/providers/assessment_provider.dart';
+import 'package:sih_internal_app_1/src/services/local_json_loader.dart';
 
 class AssessmentCategoriesPage extends StatefulWidget {
   const AssessmentCategoriesPage({super.key});
@@ -54,108 +57,7 @@ class _AssessmentCategoriesPageState extends State<AssessmentCategoriesPage>
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // List of all assessment categories
-    final categories = [
-      {
-        'title': 'Vertical Jump',
-        'icon': Icons.arrow_upward_rounded,
-        'color': const Color(0xFFFF6B6B),
-        'subtitle': 'Power Test',
-        'duration': '2 min',
-        'description': 'Measure your explosive power and vertical leap ability',
-        'isPopular': true,
-      },
-      {
-        'title': 'Sprint Test',
-        'icon': Icons.directions_run_rounded,
-        'color': const Color(0xFF4ECDC4),
-        'subtitle': 'Speed Test',
-        'duration': '5 min',
-        'description': 'Test your acceleration and maximum running speed',
-        'isPopular': false,
-      },
-      {
-        'title': 'Shuttle Run',
-        'icon': Icons.swap_horiz_rounded,
-        'color': const Color(0xFF9B59B6),
-        'subtitle': 'Agility Test',
-        'duration': '3 min',
-        'description': 'Assess your change of direction and lateral movement',
-        'isPopular': false,
-      },
-      {
-        'title': 'Core Strength',
-        'icon': Icons.fitness_center_rounded,
-        'color': const Color(0xFFF39C12),
-        'subtitle': 'Strength Test',
-        'duration': '4 min',
-        'description': 'Evaluate your abdominal and core muscle strength',
-        'isPopular': false,
-      },
-      {
-        'title': 'Balance Test',
-        'icon': Icons.accessibility_new_rounded,
-        'color': const Color(0xFF3498DB),
-        'subtitle': 'Stability Test',
-        'duration': '3 min',
-        'description': 'Assess your balance and proprioception abilities',
-        'isPopular': false,
-      },
-      {
-        'title': 'Endurance Run',
-        'icon': Icons.directions_walk_rounded,
-        'color': const Color(0xFF2ECC71),
-        'subtitle': 'Cardio Test',
-        'duration': '10 min',
-        'description': 'Test your cardiovascular endurance and stamina',
-        'isPopular': false,
-      },
-      {
-        'title': 'Flexibility Test',
-        'icon': Icons.straighten_rounded,
-        'color': const Color(0xFF9B59B6),
-        'subtitle': 'Mobility Test',
-        'duration': '5 min',
-        'description': 'Measure your joint flexibility and range of motion',
-        'isPopular': false,
-      },
-      {
-        'title': 'Push-up Test',
-        'icon': Icons.fitness_center_rounded,
-        'color': const Color(0xFFE67E22),
-        'subtitle': 'Upper Body',
-        'duration': '3 min',
-        'description': 'Evaluate your upper body strength and endurance',
-        'isPopular': false,
-      },
-      {
-        'title': 'Pull-up Test',
-        'icon': Icons.sports_gymnastics_rounded,
-        'color': const Color(0xFF34495E),
-        'subtitle': 'Upper Body',
-        'duration': '4 min',
-        'description': 'Test your pulling strength and back muscle power',
-        'isPopular': false,
-      },
-      {
-        'title': 'Sit-up Test',
-        'icon': Icons.sports_rounded,
-        'color': const Color(0xFF16A085),
-        'subtitle': 'Core Endurance',
-        'duration': '2 min',
-        'description': 'Measure your abdominal endurance and strength',
-        'isPopular': false,
-      },
-      {
-        'title': 'Plank Test',
-        'icon': Icons.view_stream_rounded,
-        'color': const Color(0xFF8E44AD),
-        'subtitle': 'Core Stability',
-        'duration': '5 min',
-        'description': 'Assess your core stability and isometric strength',
-        'isPopular': false,
-      },
-    ];
+    final provider = context.watch<AssessmentProvider>();
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -408,28 +310,45 @@ class _AssessmentCategoriesPageState extends State<AssessmentCategoriesPage>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Categories List
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: categories.length,
-                            itemBuilder: (context, index) {
-                              final category = categories[index];
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: _buildCategoryCard(
-                                  context,
-                                  category['title'] as String,
-                                  category['icon'] as IconData,
-                                  category['color'] as Color,
-                                  category['subtitle'] as String,
-                                  category['duration'] as String,
-                                  category['description'] as String,
-                                  category['isPopular'] as bool,
+                          if (provider.loading)
+                            const Center(child: CircularProgressIndicator()),
+                          if (provider.error != null)
+                            Center(
+                              child: Text(
+                                'Failed to load categories',
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                            ),
+                          if (!provider.loading && provider.error == null)
+                            if (provider.categories.isEmpty)
+                              Center(
+                                child: Text(
+                                  'No categories available',
+                                  style: theme.textTheme.bodyMedium,
                                 ),
-                              );
-                            },
-                          ),
+                              )
+                            else
+                              ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: provider.categories.length,
+                                itemBuilder: (context, index) {
+                                  final c = provider.categories[index];
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: _buildCategoryCard(
+                                      context,
+                                      c.title,
+                                      UiMappers.iconFromKey(c.iconKey),
+                                      UiMappers.colorFromHex(c.colorHex),
+                                      c.subtitle,
+                                      c.duration,
+                                      c.description,
+                                      c.isPopular,
+                                    ),
+                                  );
+                                },
+                              ),
 
                           const SizedBox(height: 100), // Bottom spacing
                         ],

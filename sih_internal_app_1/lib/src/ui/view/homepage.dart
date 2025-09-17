@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'notification_page.dart';
+import 'package:provider/provider.dart';
+import 'package:sih_internal_app_1/src/providers/assessment_provider.dart';
+import 'package:sih_internal_app_1/src/providers/notification_provider.dart';
+import 'package:sih_internal_app_1/src/services/local_json_loader.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -97,6 +101,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    // Providers
+    final assessmentProvider = context.watch<AssessmentProvider>();
+    final notificationsProvider = context.watch<NotificationsProvider>();
+    final hasUnreadNotifications = !notificationsProvider.loading &&
+        notificationsProvider.items.any((n) => !n.isRead);
+
     // Enhanced notification icon with animation
     final notificationIcon = GestureDetector(
       onTap: () {
@@ -143,34 +153,35 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               color: colorScheme.onPrimary,
               size: 22,
             ),
-            Positioned(
-              top: 0,
-              right: 0,
-              child: AnimatedBuilder(
-                animation: _pulseAnimation,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _pulseAnimation.value,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: Colors.redAccent,
-                        borderRadius: BorderRadius.circular(4),
-                        boxShadow: [
-                          BoxShadow(
-                            color:
-                                Colors.redAccent.withAlpha((0.5 * 255).toInt()),
-                            blurRadius: 4,
-                            spreadRadius: 1,
-                          ),
-                        ],
+            if (hasUnreadNotifications)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: AnimatedBuilder(
+                  animation: _pulseAnimation,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: _pulseAnimation.value,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: Colors.redAccent,
+                          borderRadius: BorderRadius.circular(4),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.redAccent
+                                  .withAlpha((0.5 * 255).toInt()),
+                              blurRadius: 4,
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -558,50 +569,51 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
                       const SizedBox(height: 20),
 
-                      // Sports Grid with enhanced cards
-                      GridView.count(
-                        crossAxisCount: 2,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        childAspectRatio: 1.05,
-                        children: [
-                          _buildEnhancedSportsCard(
-                            context,
-                            'Vertical Jump',
-                            Icons.arrow_upward_rounded,
-                            const Color(0xFFFF6B6B),
-                            'Power Test',
-                            '2 min',
-                            isPopular: true,
-                          ),
-                          _buildEnhancedSportsCard(
-                            context,
-                            'Sprint Test',
-                            Icons.directions_run_rounded,
-                            const Color(0xFF4ECDC4),
-                            'Speed Test',
-                            '5 min',
-                          ),
-                          _buildEnhancedSportsCard(
-                            context,
-                            'Shuttle Run',
-                            Icons.swap_horiz_rounded,
-                            const Color(0xFF9B59B6),
-                            'Agility Test',
-                            '3 min',
-                          ),
-                          _buildEnhancedSportsCard(
-                            context,
-                            'Core Strength',
-                            Icons.fitness_center_rounded,
-                            const Color(0xFFF39C12),
-                            'Strength Test',
-                            '4 min',
-                          ),
-                        ],
-                      ),
+                      // Provider-backed categories grid
+                      Builder(builder: (context) {
+                        if (assessmentProvider.loading) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                        if (assessmentProvider.error != null) {
+                          return Center(
+                            child: Text(
+                              'Failed to load categories',
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          );
+                        }
+                        if (assessmentProvider.categories.isEmpty) {
+                          return Center(
+                            child: Text(
+                              'No categories available',
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          );
+                        }
+                        final list =
+                            assessmentProvider.categories.take(4).toList();
+                        return GridView.count(
+                          crossAxisCount: 2,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 1.05,
+                          children: [
+                            for (final c in list)
+                              _buildEnhancedSportsCard(
+                                context,
+                                c.title,
+                                UiMappers.iconFromKey(c.iconKey),
+                                UiMappers.colorFromHex(c.colorHex),
+                                c.subtitle,
+                                c.duration,
+                                isPopular: c.isPopular,
+                              ),
+                          ],
+                        );
+                      }),
                     ],
                   ),
                 ),

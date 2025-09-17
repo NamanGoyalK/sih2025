@@ -1,0 +1,12 @@
+[
+  { "rank": 1, "name": "Priya S.", "points": 947, "change": 3 },
+  { "rank": 2, "name": "Arjun K.", "points": 892, "change": -1 },
+  { "rank": 3, "name": "Rohit M.", "points": 856, "change": 1 },
+  { "rank": 4, "name": "Aarav P.", "points": 841, "change": 2 },
+  { "rank": 5, "name": "Diya K.", "points": 826, "change": -2 },
+  { "rank": 6, "name": "Vihaan S.", "points": 811, "change": 5 },
+  { "rank": 7, "name": "Ananya R.", "points": 796, "change": 1 },
+  { "rank": 8, "name": "Reyansh M.", "points": 781, "change": -3 },
+  { "rank": 9, "name": "Kavya T.", "points": 766, "change": 4 },
+  { "rank": 10, "name": "Arjun G.", "points": 751, "change": 2 }
+]

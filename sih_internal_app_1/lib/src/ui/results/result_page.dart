@@ -3,6 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:video_player/video_player.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:sih_internal_app_1/src/providers/results_provider.dart';
+import 'package:sih_internal_app_1/src/models/results.dart';
 
 class ResultsPage extends StatefulWidget {
   const ResultsPage({super.key});
@@ -15,32 +18,6 @@ class _ResultsPageState extends State<ResultsPage> {
   int selectedTab = 0; // 0: Results, 1: Graph, 2: Video
   late VideoPlayerController _videoController;
   bool _videoInitialized = false;
-
-  final summary = {
-    "total_jumps": 2,
-    "best_jump_height": 0.152,
-    "best_jump_distance": 0.019,
-    "best_jump_flight_time": 1.26,
-    "average_height": 0.084,
-    "average_distance": 0.015,
-    "average_knee_angle": 138.3,
-    "average_flight_time": 0.69
-  };
-
-  final jumps = [
-    {
-      "Jump Height (relative)": 0.152,
-      "Jump Distance (relative)": 0.019,
-      "Knee Angle at crouch": 140.0,
-      "Flight Time (s)": 1.26
-    },
-    {
-      "Jump Height (relative)": 0.016,
-      "Jump Distance (relative)": 0.011,
-      "Knee Angle at crouch": 136.6,
-      "Flight Time (s)": 0.11
-    },
-  ];
 
   String selectedMetric = "Jump Height (relative)";
 
@@ -63,6 +40,8 @@ class _ResultsPageState extends State<ResultsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<ResultsProvider>();
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -80,50 +59,57 @@ class _ResultsPageState extends State<ResultsPage> {
         ),
       ),
       body: SafeArea(
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            // ===== Top Tabs =====
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.all(16.w),
-                child: Container(
-                  height: 40.h,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: Colors.black),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildTabButton("Results", 0),
-                      const VerticalDivider(color: Colors.black),
-                      _buildTabButton("Graph", 1),
-                      const VerticalDivider(color: Colors.black),
-                      _buildTabButton("Video", 2),
+        child: provider.loading
+            ? const Center(child: CircularProgressIndicator())
+            : provider.error != null
+                ? Center(
+                    child: Text('Failed to load results',
+                        style: Theme.of(context).textTheme.bodyMedium),
+                  )
+                : CustomScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    slivers: [
+                      // ===== Top Tabs =====
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.all(16.w),
+                          child: Container(
+                            height: 40.h,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(30),
+                              border: Border.all(color: Colors.black),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                _buildTabButton("Results", 0),
+                                const VerticalDivider(color: Colors.black),
+                                _buildTabButton("Graph", 1),
+                                const VerticalDivider(color: Colors.black),
+                                _buildTabButton("Video", 2),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // ===== Tab Content =====
+                      if (selectedTab == 0) _buildResultsView(provider.summary),
+                      if (selectedTab == 1) _buildGraphView(provider.jumps),
+                      if (selectedTab == 2) _buildVideoView(),
+
+                      // ===== Footer =====
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.all(16.w),
+                          child: ElevatedButton(
+                            onPressed: () {},
+                            child: const Text('Download Results'),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                ),
-              ),
-            ),
-        
-            // ===== Tab Content =====
-            if (selectedTab == 0) _buildResultsView(),
-            if (selectedTab == 1) _buildGraphView(),
-            if (selectedTab == 2) _buildVideoView(),
-        
-            // ===== Footer =====
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.all(16.w),
-                child: ElevatedButton(
-                  onPressed: () {},
-                  child: const Text('Download Results'),
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -142,14 +128,34 @@ class _ResultsPageState extends State<ResultsPage> {
   }
 
   // ===== RESULTS TAB =====
-  Widget _buildResultsView() {
+  Widget _buildResultsView(ResultSummary? summary) {
+    if (summary == null) {
+      return const SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Center(child: Text('No summary data')),
+        ),
+      );
+    }
+
+    final entries = {
+      "total_jumps": summary.totalJumps,
+      "best_jump_height": summary.bestJumpHeight,
+      "best_jump_distance": summary.bestJumpDistance,
+      "best_jump_flight_time": summary.bestJumpFlightTime,
+      "average_height": summary.averageHeight,
+      "average_distance": summary.averageDistance,
+      "average_knee_angle": summary.averageKneeAngle,
+      "average_flight_time": summary.averageFlightTime,
+    };
+
     return SliverToBoxAdapter(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         child: Wrap(
           spacing: 10.sp,
           runSpacing: 10.sp,
-          children: summary.entries.map((e) {
+          children: entries.entries.map((e) {
             return Container(
               width: double.infinity,
               padding: EdgeInsets.all(16.sp),
@@ -158,7 +164,9 @@ class _ResultsPageState extends State<ResultsPage> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: const [
                   BoxShadow(
-                      color: Colors.black12, blurRadius: 6, offset: Offset(0, 3))
+                      color: Colors.black12,
+                      blurRadius: 6,
+                      offset: Offset(0, 3))
                 ],
               ),
               child: Column(
@@ -180,7 +188,23 @@ class _ResultsPageState extends State<ResultsPage> {
   }
 
   // ===== GRAPH TAB =====
-  Widget _buildGraphView() {
+  Widget _buildGraphView(List<JumpEntry> jumps) {
+    if (jumps.isEmpty) {
+      return const SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Center(child: Text('No jumps data')),
+        ),
+      );
+    }
+
+    final metrics = [
+      "Jump Height (relative)",
+      "Jump Distance (relative)",
+      "Knee Angle at crouch",
+      "Flight Time (s)"
+    ];
+
     return SliverToBoxAdapter(
       child: Padding(
         padding: EdgeInsets.all(16.sp),
@@ -192,12 +216,9 @@ class _ResultsPageState extends State<ResultsPage> {
             SizedBox(height: 8.h),
             DropdownButton<String>(
               value: selectedMetric,
-              items: [
-                "Jump Height (relative)",
-                "Jump Distance (relative)",
-                "Knee Angle at crouch",
-                "Flight Time (s)"
-              ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+              items: metrics
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .toList(),
               onChanged: (val) {
                 setState(() => selectedMetric = val!);
               },
@@ -210,7 +231,9 @@ class _ResultsPageState extends State<ResultsPage> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: const [
                   BoxShadow(
-                      color: Colors.black12, blurRadius: 6, offset: Offset(0, 3))
+                      color: Colors.black12,
+                      blurRadius: 6,
+                      offset: Offset(0, 3))
                 ],
               ),
               padding: EdgeInsets.all(12.sp),
@@ -219,7 +242,14 @@ class _ResultsPageState extends State<ResultsPage> {
                 title: ChartTitle(text: '$selectedMetric across jumps'),
                 series: <LineSeries<Map<String, dynamic>, String>>[
                   LineSeries<Map<String, dynamic>, String>(
-                    dataSource: jumps,
+                    dataSource: jumps
+                        .map((j) => {
+                              "Jump Height (relative)": j.heightRelative,
+                              "Jump Distance (relative)": j.distanceRelative,
+                              "Knee Angle at crouch": j.kneeAngleAtCrouch,
+                              "Flight Time (s)": j.flightTime,
+                            })
+                        .toList(),
                     xValueMapper: (data, index) => 'Jump ${index + 1}',
                     yValueMapper: (data, _) => data[selectedMetric] as num,
                     markerSettings: const MarkerSettings(isVisible: true),

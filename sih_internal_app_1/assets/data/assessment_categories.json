@@ -1,0 +1,47 @@
+[
+  {
+    "title": "Vertical Jump",
+    "icon": "arrow_upward",
+    "color": "#FF6B6B",
+    "subtitle": "Power Test",
+    "duration": "2 min",
+    "description": "Measure your explosive power and vertical leap ability",
+    "isPopular": true
+  },
+  {
+    "title": "Sprint Test",
+    "icon": "directions_run",
+    "color": "#4ECDC4",
+    "subtitle": "Speed Test",
+    "duration": "5 min",
+    "description": "Test your acceleration and maximum running speed",
+    "isPopular": false
+  },
+  {
+    "title": "Shuttle Run",
+    "icon": "swap_horiz",
+    "color": "#9B59B6",
+    "subtitle": "Agility Test",
+    "duration": "3 min",
+    "description": "Assess your change of direction and lateral movement",
+    "isPopular": false
+  },
+  {
+    "title": "Core Strength",
+    "icon": "fitness_center",
+    "color": "#F39C12",
+    "subtitle": "Strength Test",
+    "duration": "4 min",
+    "description": "Evaluate your abdominal and core muscle strength",
+    "isPopular": false
+  },
+  {
+    "title": "Balance Test",
+    "icon": "accessibility_new",
+    "color": "#3498DB",
+    "subtitle": "Stability Test",
+    "duration": "3 min",
+    "description": "Assess your balance and proprioception abilities",
+    "isPopular": false
+  }
+]

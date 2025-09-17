@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:sih_internal_app_1/src/models/notification.dart' as model;
+import 'package:sih_internal_app_1/src/providers/notification_provider.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -12,14 +15,12 @@ class _NotificationPageState extends State<NotificationPage>
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
 
-  List<NotificationItem> allNotifications = [];
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _initializeAnimations();
-    _initializeData();
   }
 
   void _initializeAnimations() {
@@ -43,67 +44,6 @@ class _NotificationPageState extends State<NotificationPage>
     });
   }
 
-  void _initializeData() {
-    // Sample notification data
-    allNotifications = [
-      NotificationItem(
-        id: '1',
-        title: 'New Assessment Available',
-        message:
-            'Mathematics Quiz #3 is now available. Complete it before the deadline.',
-        type: NotificationType.assessment,
-        timestamp: DateTime.now().subtract(const Duration(minutes: 30)),
-        isRead: false,
-        actionButton: 'Take Quiz',
-      ),
-      NotificationItem(
-        id: '2',
-        title: 'Leaderboard Update',
-        message:
-            'You\'ve moved up to rank #5 in the weekly leaderboard! Keep it up!',
-        type: NotificationType.achievement,
-        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-        isRead: false,
-      ),
-      NotificationItem(
-        id: '3',
-        title: 'Assessment Result',
-        message: 'Your Physics Quiz #2 has been graded. You scored 92%!',
-        type: NotificationType.result,
-        timestamp: DateTime.now().subtract(const Duration(hours: 4)),
-        isRead: true,
-        score: 92,
-      ),
-      NotificationItem(
-        id: '4',
-        title: 'Deadline Reminder',
-        message:
-            'Chemistry assignment is due in 2 days. Don\'t forget to submit!',
-        type: NotificationType.reminder,
-        timestamp: DateTime.now().subtract(const Duration(hours: 6)),
-        isRead: true,
-      ),
-      NotificationItem(
-        id: '5',
-        title: 'System Maintenance',
-        message:
-            'The app will be under maintenance tomorrow from 2:00 AM to 4:00 AM.',
-        type: NotificationType.system,
-        timestamp: DateTime.now().subtract(const Duration(days: 1)),
-        isRead: true,
-      ),
-      NotificationItem(
-        id: '6',
-        title: 'Welcome to SIH App!',
-        message:
-            'Thank you for joining us. Complete your profile to get started.',
-        type: NotificationType.general,
-        timestamp: DateTime.now().subtract(const Duration(days: 2)),
-        isRead: true,
-      ),
-    ];
-  }
-
   @override
   void dispose() {
     _fadeController.dispose();
@@ -115,6 +55,7 @@ class _NotificationPageState extends State<NotificationPage>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final provider = context.watch<NotificationsProvider>();
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -367,10 +308,27 @@ class _NotificationPageState extends State<NotificationPage>
           SliverToBoxAdapter(
             child: FadeTransition(
               opacity: _fadeAnimation,
-              child: _buildNotificationList(
-                allNotifications,
-                'No notifications yet',
-              ),
+              child: Builder(builder: (context) {
+                if (provider.loading) {
+                  return const Padding(
+                    padding: EdgeInsets.all(24.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                if (provider.error != null) {
+                  return Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Center(
+                      child: Text(
+                        'Failed to load notifications',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
+                  );
+                }
+                final items = provider.items;
+                return _buildNotificationList(items, 'No notifications yet');
+              }),
             ),
           ),
         ],
@@ -379,7 +337,7 @@ class _NotificationPageState extends State<NotificationPage>
   }
 
   Widget _buildNotificationList(
-      List<NotificationItem> notifications, String emptyMessage) {
+      List<model.NotificationItem> notifications, String emptyMessage) {
     if (notifications.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(16),
@@ -430,7 +388,8 @@ class _NotificationPageState extends State<NotificationPage>
     );
   }
 
-  Widget _buildNotificationCard(NotificationItem notification, int index) {
+  Widget _buildNotificationCard(
+      model.NotificationItem notification, int index) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -572,32 +531,32 @@ class _NotificationPageState extends State<NotificationPage>
   }
 
   Widget _buildNotificationIcon(
-      NotificationItem notification, ColorScheme colorScheme) {
+      model.NotificationItem notification, ColorScheme colorScheme) {
     IconData icon;
     Color color;
 
     switch (notification.type) {
-      case NotificationType.assessment:
+      case model.NotificationType.assessment:
         icon = Icons.quiz_outlined;
         color = Colors.blue;
         break;
-      case NotificationType.achievement:
+      case model.NotificationType.achievement:
         icon = Icons.emoji_events_outlined;
         color = Colors.amber;
         break;
-      case NotificationType.result:
+      case model.NotificationType.result:
         icon = Icons.grade_outlined;
         color = Colors.green;
         break;
-      case NotificationType.reminder:
+      case model.NotificationType.reminder:
         icon = Icons.schedule_outlined;
         color = Colors.orange;
         break;
-      case NotificationType.system:
+      case model.NotificationType.system:
         icon = Icons.settings_outlined;
         color = Colors.grey;
         break;
-      case NotificationType.general:
+      case model.NotificationType.general:
         icon = Icons.info_outlined;
         color = colorScheme.primary;
         break;
@@ -639,42 +598,35 @@ class _NotificationPageState extends State<NotificationPage>
     }
   }
 
-  void _handleNotificationTap(NotificationItem notification) {
+  void _handleNotificationTap(model.NotificationItem notification) {
     if (!notification.isRead) {
       _markAsRead(notification);
     }
 
-    // Handle navigation based on notification type
     switch (notification.type) {
-      case NotificationType.assessment:
-        // Navigate to assessment
+      case model.NotificationType.assessment:
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Opening assessment...')),
         );
         break;
-      case NotificationType.result:
-        // Navigate to results
+      case model.NotificationType.result:
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Opening results...')),
         );
         break;
       default:
-        // Default action
         break;
     }
   }
 
-  void _handleNotificationAction(NotificationItem notification) {
-    // Handle specific notification actions
+  void _handleNotificationAction(model.NotificationItem notification) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('${notification.actionButton} clicked!')),
     );
   }
 
-  void _markAsRead(NotificationItem notification) {
-    setState(() {
-      notification.isRead = true;
-    });
+  void _markAsRead(model.NotificationItem notification) {
+    context.read<NotificationsProvider>().markItemRead(notification.id);
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -684,10 +636,8 @@ class _NotificationPageState extends State<NotificationPage>
     );
   }
 
-  void _deleteNotification(NotificationItem notification) {
-    setState(() {
-      allNotifications.removeWhere((n) => n.id == notification.id);
-    });
+  void _deleteNotification(model.NotificationItem notification) {
+    context.read<NotificationsProvider>().deleteById(notification.id);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -695,7 +645,7 @@ class _NotificationPageState extends State<NotificationPage>
         action: SnackBarAction(
           label: 'Undo',
           onPressed: () {
-            // Implement undo functionality
+            // For simplicity, not implementing undo persistence here
           },
         ),
       ),
@@ -703,46 +653,10 @@ class _NotificationPageState extends State<NotificationPage>
   }
 
   void _markAllAsRead() {
-    setState(() {
-      for (var notification in allNotifications) {
-        notification.isRead = true;
-      }
-    });
+    context.read<NotificationsProvider>().markAllRead();
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('All notifications marked as read')),
     );
   }
-}
-
-// Models and Enums
-enum NotificationType {
-  assessment,
-  achievement,
-  result,
-  reminder,
-  system,
-  general,
-}
-
-class NotificationItem {
-  final String id;
-  final String title;
-  final String message;
-  final NotificationType type;
-  final DateTime timestamp;
-  bool isRead;
-  final String? actionButton;
-  final int? score;
-
-  NotificationItem({
-    required this.id,
-    required this.title,
-    required this.message,
-    required this.type,
-    required this.timestamp,
-    this.isRead = false,
-    this.actionButton,
-    this.score,
-  });
 }

@@ -31,3 +31,5 @@ flutter:
   assets:
     - assets/Sign In.json
     - assets/dummyvid1sih.mp4
+    - assets/data/
+    - assets/data/current_user.json

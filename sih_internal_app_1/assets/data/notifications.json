@@ -1,0 +1,28 @@
+[
+  {
+    "id": "1",
+    "title": "New Assessment Available",
+    "message": "Mathematics Quiz #3 is now available. Complete it before the deadline.",
+    "type": "assessment",
+    "timestamp": "2025-09-17T09:30:00.000Z",
+    "isRead": false,
+    "actionButton": "Take Quiz"
+  },
+  {
+    "id": "2",
+    "title": "Leaderboard Update",
+    "message": "You've moved up to rank #5 in the weekly leaderboard! Keep it up!",
+    "type": "achievement",
+    "timestamp": "2025-09-17T07:00:00.000Z",
+    "isRead": false
+  },
+  {
+    "id": "3",
+    "title": "Assessment Result",
+    "message": "Your Physics Quiz #2 has been graded. You scored 92%!",
+    "type": "result",
+    "timestamp": "2025-09-17T05:00:00.000Z",
+    "isRead": true,
+    "score": 92
+  }
+]

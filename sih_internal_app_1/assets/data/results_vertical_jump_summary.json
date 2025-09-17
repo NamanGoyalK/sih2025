@@ -1,0 +1,10 @@
+{
+  "total_jumps": 2,
+  "best_jump_height": 0.152,
+  "best_jump_distance": 0.019,
+  "best_jump_flight_time": 1.26,
+  "average_height": 0.084,
+  "average_distance": 0.015,
+  "average_knee_angle": 138.3,
+  "average_flight_time": 0.69
+}

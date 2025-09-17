@@ -1,0 +1,14 @@
+[
+  {
+    "Jump Height (relative)": 0.152,
+    "Jump Distance (relative)": 0.019,
+    "Knee Angle at crouch": 140.0,
+    "Flight Time (s)": 1.26
+  },
+  {
+    "Jump Height (relative)": 0.016,
+    "Jump Distance (relative)": 0.011,
+    "Knee Angle at crouch": 136.6,
+    "Flight Time (s)": 0.11
+  }
+]

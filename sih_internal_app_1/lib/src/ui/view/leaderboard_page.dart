@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:sih_internal_app_1/src/providers/leaderboard_provider.dart';
+import 'package:sih_internal_app_1/src/providers/user_provider.dart';
 
 class LeaderboardPage extends StatefulWidget {
   const LeaderboardPage({super.key});
@@ -16,7 +19,6 @@ class _LeaderboardPageState extends State<LeaderboardPage>
   late Animation<double> _slideAnimation;
   late Animation<double> _scaleAnimation;
 
-  // Changed to Set<int> for SegmentedButton
   Set<int> selectedFilter = {0};
   final ScrollController _scrollController = ScrollController();
 
@@ -75,13 +77,24 @@ class _LeaderboardPageState extends State<LeaderboardPage>
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    final leaderboardProvider = context.watch<LeaderboardProvider>();
+    final userProvider = context.watch<UserProvider>();
+    final currentUserName = userProvider.user?.name;
+    final currentUserEntry = currentUserName == null
+        ? null
+        : leaderboardProvider.entries.firstWhere(
+            (e) => e.name == currentUserName,
+            orElse: () => leaderboardProvider.entries.isNotEmpty
+                ? leaderboardProvider.entries.first
+                : null as dynamic,
+          );
+
     return Scaffold(
       backgroundColor: colorScheme.surface,
       body: CustomScrollView(
         controller: _scrollController,
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // Enhanced Animated Header
           SliverAppBar(
             expandedHeight: 180,
             floating: false,
@@ -141,7 +154,6 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                     ),
                     background: Stack(
                       children: [
-                        // Decorative elements
                         Positioned(
                           top: -30,
                           right: -30,
@@ -285,14 +297,10 @@ class _LeaderboardPageState extends State<LeaderboardPage>
               },
             ),
           ),
-
-          // Main Content
           SliverToBoxAdapter(
             child: Column(
               children: [
                 const SizedBox(height: 24),
-
-                // *** CHANGED: Replaced filter tabs with SegmentedButton ***
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   width: double.infinity,
@@ -316,7 +324,6 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                     ],
                     selected: selectedFilter,
                     onSelectionChanged: (Set<int> newSelection) {
-                      // Ensure at least one button is always selected
                       if (newSelection.isNotEmpty) {
                         HapticFeedback.lightImpact();
                         setState(() {
@@ -335,10 +342,7 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 32),
-
-                // Enhanced Top 3 Podium
                 AnimatedBuilder(
                   animation: _scaleAnimation,
                   builder: (context, child) {
@@ -400,41 +404,73 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                                 ],
                               ),
                               const SizedBox(height: 28),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  // 2nd Place
-                                  // *** CHANGED: Updated call to new podium card ***
-                                  _buildEnhancedPodiumCard(
-                                    context,
-                                    'Arjun K.',
-                                    '2',
-                                    '892 pts',
-                                    const Color.fromARGB(255, 143, 140, 140),
-                                  ),
-                                  // 1st Place
-                                  // *** CHANGED: Updated call to new podium card ***
-                                  _buildEnhancedPodiumCard(
-                                    context,
-                                    'Priya S.',
-                                    '1',
-                                    '947 pts',
-                                    const Color.fromARGB(255, 152, 129, 3),
-                                    isFirst: true,
-                                  ),
-                                  // 3rd Place
-                                  // *** CHANGED: Updated call to new podium card ***
-                                  _buildEnhancedPodiumCard(
-                                    context,
-                                    'Rohit M.',
-                                    '3',
-                                    '856 pts',
-                                    const Color(0xFFCD7F32),
-                                  ),
-                                ],
-                              ),
+                              Builder(builder: (context) {
+                                if (leaderboardProvider.loading) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                }
+                                if (leaderboardProvider.error != null) {
+                                  return Center(
+                                    child: Text(
+                                      'Failed to load leaderboard',
+                                      style: theme.textTheme.bodyMedium,
+                                    ),
+                                  );
+                                }
+                                if (leaderboardProvider.entries.isEmpty) {
+                                  return Center(
+                                    child: Text(
+                                      'No leaderboard data available',
+                                      style: theme.textTheme.bodyMedium,
+                                    ),
+                                  );
+                                }
+                                final top = leaderboardProvider.entries
+                                    .take(3)
+                                    .toList();
+                                while (top.length < 3) {
+                                  top.add(top.first);
+                                }
+                                return Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    _buildEnhancedPodiumCard(
+                                      context,
+                                      top.length > 1
+                                          ? top[1].name
+                                          : top[0].name,
+                                      (top.length > 1
+                                              ? top[1].rank
+                                              : top[0].rank)
+                                          .toString(),
+                                      '${top.length > 1 ? top[1].points : top[0].points} pts',
+                                      const Color.fromARGB(255, 143, 140, 140),
+                                    ),
+                                    _buildEnhancedPodiumCard(
+                                      context,
+                                      top[0].name,
+                                      top[0].rank.toString(),
+                                      '${top[0].points} pts',
+                                      const Color.fromARGB(255, 152, 129, 3),
+                                      isFirst: true,
+                                    ),
+                                    _buildEnhancedPodiumCard(
+                                      context,
+                                      top.length > 2
+                                          ? top[2].name
+                                          : top[0].name,
+                                      (top.length > 2
+                                              ? top[2].rank
+                                              : top[0].rank)
+                                          .toString(),
+                                      '${top.length > 2 ? top[2].points : top[0].points} pts',
+                                      const Color(0xFFCD7F32),
+                                    ),
+                                  ],
+                                );
+                              }),
                             ],
                           ),
                         ),
@@ -442,10 +478,7 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                     );
                   },
                 ),
-
                 const SizedBox(height: 32),
-
-                // Enhanced Your Rank Card
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   decoration: BoxDecoration(
@@ -493,7 +526,9 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                               ),
                               child: Center(
                                 child: Text(
-                                  '#47',
+                                  currentUserEntry != null
+                                      ? '#${currentUserEntry.rank}'
+                                      : '#—',
                                   style: theme.textTheme.titleLarge?.copyWith(
                                     color: colorScheme.onSecondary,
                                     fontWeight: FontWeight.w900,
@@ -507,11 +542,15 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                               child: Container(
                                 padding: const EdgeInsets.all(4),
                                 decoration: BoxDecoration(
-                                  color: Colors.green,
+                                  color: (currentUserEntry?.change ?? 0) >= 0
+                                      ? Colors.green
+                                      : Colors.red,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Icon(
-                                  Icons.trending_up_rounded,
+                                child: Icon(
+                                  (currentUserEntry?.change ?? 0) >= 0
+                                      ? Icons.trending_up_rounded
+                                      : Icons.trending_down_rounded,
                                   color: Colors.white,
                                   size: 12,
                                 ),
@@ -534,29 +573,39 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.green
-                                          .withAlpha((0.2 * 255).toInt()),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Text(
-                                      '+3',
-                                      style:
-                                          theme.textTheme.labelSmall?.copyWith(
-                                        color: Colors.green,
-                                        fontWeight: FontWeight.w700,
+                                  if (currentUserEntry != null)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: (currentUserEntry.change) >= 0
+                                            ? Colors.green
+                                                .withAlpha((0.2 * 255).toInt())
+                                            : Colors.red
+                                                .withAlpha((0.2 * 255).toInt()),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        currentUserEntry.change >= 0
+                                            ? '+${currentUserEntry.change}'
+                                            : '${currentUserEntry.change}',
+                                        style: theme.textTheme.labelSmall
+                                            ?.copyWith(
+                                          color: (currentUserEntry.change) >= 0
+                                              ? Colors.green
+                                              : Colors.red,
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                       ),
                                     ),
-                                  ),
                                 ],
                               ),
                               Text(
-                                'You (Naman Goyal)',
+                                currentUserName != null
+                                    ? 'You ($currentUserName)'
+                                    : 'You',
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w800,
                                   color: colorScheme.onSurface,
@@ -569,14 +618,18 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              '634 pts',
+                              currentUserEntry != null
+                                  ? '${currentUserEntry.points} pts'
+                                  : '—',
                               style: theme.textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.w900,
                                 color: colorScheme.secondary,
                               ),
                             ),
                             Text(
-                              'Top 5%',
+                              currentUserEntry != null
+                                  ? 'Top ${(currentUserEntry.rank / (leaderboardProvider.entries.isNotEmpty ? leaderboardProvider.entries.length : 1) * 100).clamp(1, 100).round()}%'
+                                  : 'Top —',
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.w600,
@@ -588,10 +641,7 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 32),
-
-                // Enhanced Leaderboard List
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   child: Column(
@@ -652,23 +702,47 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                         ],
                       ),
                       const SizedBox(height: 20),
-                      ...List.generate(
-                        10,
-                        (index) => _buildEnhancedLeaderboardItem(
-                          context,
-                          (index + 4).toString(),
-                          _getRandomName(index),
-                          _getRandomPoints(index),
-                          _getRandomChange(index),
-                          colorScheme,
-                          theme,
-                          index,
-                        ),
-                      ),
+                      Builder(builder: (context) {
+                        if (leaderboardProvider.loading) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                        if (leaderboardProvider.error != null) {
+                          return Center(
+                            child: Text(
+                              'Failed to load leaderboard',
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          );
+                        }
+                        final entries = leaderboardProvider.entries;
+                        if (entries.isEmpty) {
+                          return Center(
+                            child: Text(
+                              'No entries to show',
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          );
+                        }
+                        return Column(
+                          children: [
+                            for (final e in entries)
+                              _buildEnhancedLeaderboardItem(
+                                context,
+                                e.rank.toString(),
+                                e.name,
+                                '${e.points} pts',
+                                e.change >= 0 ? '+${e.change}' : '${e.change}',
+                                colorScheme,
+                                theme,
+                                e.rank,
+                              ),
+                          ],
+                        );
+                      }),
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 100),
               ],
             ),
@@ -678,9 +752,6 @@ class _LeaderboardPageState extends State<LeaderboardPage>
     );
   }
 
-  // *** REMOVED: _buildEnhancedFilterTab method is no longer needed ***
-
-  // *** CHANGED: Rewrote podium card to be more minimal ***
   Widget _buildEnhancedPodiumCard(
     BuildContext context,
     String name,
@@ -697,19 +768,17 @@ class _LeaderboardPageState extends State<LeaderboardPage>
           clipBehavior: Clip.none,
           alignment: Alignment.center,
           children: [
-            // Profile picture placeholder
             CircleAvatar(
-              radius: isFirst ? 40 : 35, // 1st place is bigger
+              radius: isFirst ? 40 : 35,
               backgroundColor: color.withAlpha((0.2 * 255).toInt()),
               child: Text(
-                name.split(' ').map((e) => e[0]).join(), // Initials
+                name.split(' ').map((e) => e[0]).join(),
                 style: theme.textTheme.titleLarge?.copyWith(
                     color: color,
                     fontWeight: FontWeight.w600,
                     fontSize: isFirst ? 24 : 20),
               ),
             ),
-            // Rank badge
             Positioned(
               bottom: -5,
               right: isFirst ? -5 : -2,
@@ -733,7 +802,7 @@ class _LeaderboardPageState extends State<LeaderboardPage>
             ),
           ],
         ),
-        const SizedBox(height: 16), // Increased spacing to account for badge
+        const SizedBox(height: 16),
         Text(
           name,
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -797,7 +866,6 @@ class _LeaderboardPageState extends State<LeaderboardPage>
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // Rank container
             Container(
               width: 40,
               height: 40,
@@ -824,7 +892,6 @@ class _LeaderboardPageState extends State<LeaderboardPage>
               ),
             ),
             const SizedBox(width: 16),
-            // Avatar
             Container(
               width: 44,
               height: 44,
@@ -848,7 +915,6 @@ class _LeaderboardPageState extends State<LeaderboardPage>
               ),
             ),
             const SizedBox(width: 16),
-            // Name and details
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -888,7 +954,6 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                 ],
               ),
             ),
-            // Points
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -920,42 +985,5 @@ class _LeaderboardPageState extends State<LeaderboardPage>
         ),
       ),
     );
-  }
-
-  String _getRandomName(int index) {
-    final names = [
-      'Aarav P.',
-      'Diya K.',
-      'Vihaan S.',
-      'Ananya R.',
-      'Reyansh M.',
-      'Kavya T.',
-      'Arjun G.',
-      'Ira L.',
-      'Vivaan J.',
-      'Saanvi N.',
-    ];
-    return names[index % names.length];
-  }
-
-  String _getRandomPoints(int index) {
-    final basePoints = 830 - (index * 15);
-    return '$basePoints pts';
-  }
-
-  String _getRandomChange(int index) {
-    final changes = [
-      '+2',
-      '-1',
-      '+5',
-      '+3',
-      '-2',
-      '+1',
-      '+4',
-      '-3',
-      '+6',
-      '+2'
-    ];
-    return changes[index % changes.length];
   }
 }
