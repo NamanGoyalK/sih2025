@@ -8,6 +8,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:video_player/video_player.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:sih_internal_app_1/src/providers/video_analysis_provider.dart';
 
 enum RecordingState {
   setup, // 10-second countdown setup
@@ -305,6 +307,10 @@ class _WorkoutRecordingPageState extends State<WorkoutRecordingPage>
   }
 
   void _retakeVideo() {
+    // Clear previous analysis results
+    final analysisProvider = context.read<VideoAnalysisProvider>();
+    analysisProvider.clearResult();
+
     // Clean up video player
     _videoPlayerController?.dispose();
     _videoPlayerController = null;
@@ -325,21 +331,170 @@ class _WorkoutRecordingPageState extends State<WorkoutRecordingPage>
     _startSetupCountdown();
   }
 
-  void _submitVideo() {
-    // Show loading dialog
+  void _submitVideo() async {
+    if (_videoPath == null) return;
+
+    final analysisProvider = context.read<VideoAnalysisProvider>();
+
+    // Show loading dialog with progress
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
+      builder: (context) => AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            const Text('Analyzing your workout...'),
+            const SizedBox(height: 8),
+            Text(
+              'This may take a few moments',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+            ),
+            const SizedBox(height: 16),
+            StreamBuilder<double>(
+              stream: Stream.periodic(
+                const Duration(milliseconds: 100),
+                (_) => analysisProvider.uploadProgress,
+              ),
+              builder: (context, snapshot) {
+                final progress = snapshot.data ?? 0.0;
+                return Column(
+                  children: [
+                    LinearProgressIndicator(value: progress),
+                    const SizedBox(height: 8),
+                    Text('${(progress * 100).toInt()}%'),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
 
-    // Simulate AI assessment processing
-    Timer(const Duration(seconds: 3), () {
-      Navigator.of(context).pop(); // Close loading dialog
-      context.go('/results'); // Navigate to results page
-    });
+    try {
+      // Analyze the video using the API
+      await analysisProvider.analyzeVideo(
+        File(_videoPath!),
+        widget.workoutType,
+      );
+
+      // Close loading dialog
+      if (mounted) Navigator.of(context).pop();
+
+      if (analysisProvider.error != null) {
+        // Show error dialog with retry option
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Row(
+                children: [
+                  Icon(Icons.error_outline, color: Colors.red),
+                  SizedBox(width: 8),
+                  Text('Analysis Failed'),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(analysisProvider.error!),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'You can try again or retake the video.',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _submitVideo(); // Retry
+                  },
+                  child: const Text('Try Again'),
+                ),
+              ],
+            ),
+          );
+        }
+      } else {
+        // Show success message briefly before navigating
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.white),
+                  SizedBox(width: 8),
+                  Text('Analysis completed successfully!'),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+
+          // Navigate to results page after a short delay
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (mounted) {
+              context.go('/video-analysis-results');
+            }
+          });
+        }
+      }
+    } catch (e) {
+      // Close loading dialog and show error
+      if (mounted) {
+        Navigator.of(context).pop();
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.red),
+                SizedBox(width: 8),
+                Text('Connection Error'),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Failed to analyze video: ${e.toString()}'),
+                const SizedBox(height: 16),
+                const Text(
+                  'Please check your internet connection and try again.',
+                  style: TextStyle(fontSize: 14),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _submitVideo(); // Retry
+                },
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
   }
 
   void _showErrorDialog(String message) {

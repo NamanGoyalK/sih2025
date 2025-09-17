@@ -1,0 +1,48 @@
+{
+  "summary": {
+    "total_reps": 5,
+    "duration_sec": 22.5,
+    "average_angle": 85.2,
+    "min_angle": 42.1,
+    "max_angle": 128.7
+  },
+  "reps": [
+    {
+      "rep_number": 1,
+      "start_frame": 25,
+      "end_frame": 95,
+      "min_angle": 42.1,
+      "max_angle": 125.3
+    },
+    {
+      "rep_number": 2,
+      "start_frame": 105,
+      "end_frame": 180,
+      "min_angle": 44.7,
+      "max_angle": 128.7
+    },
+    {
+      "rep_number": 3,
+      "start_frame": 190,
+      "end_frame": 265,
+      "min_angle": 41.8,
+      "max_angle": 124.9
+    },
+    {
+      "rep_number": 4,
+      "start_frame": 275,
+      "end_frame": 350,
+      "min_angle": 43.2,
+      "max_angle": 127.1
+    },
+    {
+      "rep_number": 5,
+      "start_frame": 360,
+      "end_frame": 435,
+      "min_angle": 45.6,
+      "max_angle": 123.4
+    }
+  ],
+  "csv_download_url": "/jumps/download/csv?path=test_results.csv",
+  "video_download_url": "/jumps/download/video?path=test_output.mp4"
+}

@@ -6,6 +6,7 @@ import 'package:sih_internal_app_1/src/ui/results/result_page.dart';
 import 'package:sih_internal_app_1/src/ui/view/main_page.dart';
 import 'package:sih_internal_app_1/src/ui/view/workout_recording_page.dart';
 import 'package:sih_internal_app_1/src/ui/view/assessment_categories_page.dart';
+import 'package:sih_internal_app_1/src/ui/view/video_analysis_results_page.dart';
 
 final router = GoRouter(
     initialLocation: '/',
@@ -46,5 +47,10 @@ final router = GoRouter(
         path: '/assessment-categories',
         pageBuilder: (context, state) =>
             const MaterialPage(child: AssessmentCategoriesPage()),
+      ),
+      GoRoute(
+        path: '/video-analysis-results',
+        pageBuilder: (context, state) =>
+            const MaterialPage(child: VideoAnalysisResultsPage()),
       ),
     ]);
